@@ -155,4 +155,6 @@ if [ "${config_output}" != "${destdir}/output" ]; then
 fi
 
 echo "::set-output name=retype-output-root::${destdir}"
+echo "RETYPE_OUTPUT_ROOT=${destdir}" >> "${GITHUB_ENV}"
+
 echo "Retype documentation build completed successfully."
