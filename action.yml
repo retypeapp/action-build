@@ -1,0 +1,26 @@
+name: 'Retype documentation builder'
+description: 'Use this action to build documentation from your repository and push it to your gh-pages branch.'
+inputs:
+  project-name:
+    description: 'The name of the project being documented'
+    required: false
+  input-root:
+    description: 'Root directory where to process documentation from'
+    required: false
+  base:
+    description: 'Value to override retype.json's "base" config with'
+    required: false
+outputs:
+  retype-output-root:
+    description: "Path to the built retype root (will have retype.json and output/ with the actual build output)."
+    value: ${{ steps.retype-build.outputs.retype-output-root }}
+runs:
+  using: "composite"
+  steps:
+    - id: retype-build
+      run: "${GITHUB_ACTION_PATH}/build.sh"
+      shell: bash
+      env:
+        INPUT_PROJECT_NAME: ${{ inputs.project-name }}
+        INPUT_INPUT_ROOT: ${{ inputs.input-root }}
+        INPUT_OVERRIDE_BASE: ${{ inputs.base }}
