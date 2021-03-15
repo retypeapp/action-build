@@ -77,11 +77,6 @@ else
   result="$(retype init --verbose 2>&1)" || \
     fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
 
-  if [ -z "${INPUT_PROJECT_NAME}" ]; then
-    sedpat="${sedpat}
-        s#(\"title\": *\")[^\"]+(\")#\1${GITHUB_REPOSITORY##*/}\2#;"
-  fi
-
   cd - > /dev/null 2>&1
 fi
 
@@ -95,6 +90,9 @@ fi
 if [ ! -z "${INPUT_PROJECT_NAME}" ]; then
   sedpat="${sedpat}
         s#(\"title\": *\")[^\"]+(\")#\1${INPUT_PROJECT_NAME//#/\\#}\2#;"
+elif ! ${existing_retypejson}
+  sedpat="${sedpat}
+        s#(\"title\": *\")[^\"]+(\")#\1${GITHUB_REPOSITORY##*/}\2#;"
 fi
 
 inplace_sed "${sedpat}" "${destdir}/retype.json"
