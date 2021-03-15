@@ -5,12 +5,12 @@ retype_version="1.0.0"
 use_dotnet=false
 _ifs="${IFS}"
 
-if [ ! -e "functions.inc.sh" ]; then
+if [ ! -e "${GITHUB_ACTION_PATH}/functions.inc.sh" ]; then
   echo "::error file=${BASH_SOURCE},line=${LINENO}::Unable to locate functions.inc.sh file."
   exit 1
 fi
 
-source functions.inc.sh || {
+source "${GITHUB_ACTION_PATH}"/functions.inc.sh || {
   echo "::error file=${BASH_SOURCE},line=${LINENO}::Error including functions.inc.sh."
   exit 1
 }
