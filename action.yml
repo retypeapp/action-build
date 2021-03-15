@@ -8,7 +8,7 @@ inputs:
     description: 'Root directory where to process documentation from'
     required: false
   base:
-    description: 'Value to override retype.json's "base" config with'
+    description: 'Value to override retype.json''s "base" config with'
     required: false
 outputs:
   retype-output-root:
