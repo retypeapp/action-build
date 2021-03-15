@@ -71,7 +71,7 @@ ${abortbuildmsg}"
   if [ "${nl}" == comma ]; then
     echo -n ", "
     fail_nl "${multiline_msg}"
-  if [ "${nl}" == true ]; then
+  elif [ "${nl}" == true ]; then
     fail_nl "${multiline_msg}"
   else
     fail "${multiline_msg}"
