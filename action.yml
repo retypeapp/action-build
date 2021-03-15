@@ -4,9 +4,6 @@ inputs:
   project-name:
     description: 'The name of the project being documented'
     required: false
-  input-root:
-    description: 'Root directory where to process documentation from'
-    required: false
   base:
     description: 'Value to override retype.json''s "base" config with'
     required: false
@@ -22,5 +19,4 @@ runs:
       shell: bash
       env:
         INPUT_PROJECT_NAME: ${{ inputs.project-name }}
-        INPUT_INPUT_ROOT: ${{ inputs.input-root }}
         INPUT_OVERRIDE_BASE: ${{ inputs.base }}

@@ -22,52 +22,6 @@ elif ! which node > /dev/null 2>&1 || [ "$(node --version | cut -f1 -d. | cut -b
   fail "Can't find suitable dotnet or node installation to install retype package with."
 fi
 
-echo -n "Determining root for documentation in repository: "
-
-if [ ! -z "${INPUT_INPUT_ROOT}" ]; then
-  docsroot="${INPUT_INPUT_ROOT}"
-
-  # remove any heading slashes to the root path
-  while [ "${docsroot::1}" == "/" ]; do
-    docsroot="${docsroot:1}"
-  done
-
-  if [ -z "${docroot}" ]; then
-    fail_nl "Invalid documentation root directory: ${INPUT_INPUT_ROOT}"
-  fi
-
-  if [ ! -d "${docroot}" ]; then
-    fail_nl "Input documentation root directory not found: ${docroot}"
-  fi
-else
-  IFS=$'\n'
-  markdown_files=($(find ./ -type f -name "*.md"))
-  IFS="${_ifs}"
-
-  if [ ${#markdown_files[@]} -eq 0 ]; then
-    fail_nl "Unable to locate markdown documentation files."
-  elif [ ${#markdown_files[@]} -eq 1 ]; then
-    docsroot="${markdown_files[0]}"
-    docsroot="${docsroot%/*}"
-  else
-    depth=1
-    while [ ${depth} -lt 100 ]; do
-      if [ $(IFS=$'\n'; echo "${markdown_files[*]}" | cut -f1-${depth} -d/ | sort -u | wc -l) -ne 1 ]; then
-        docsroot="$(echo "${markdown_files[0]}" | cut -f1-$(( 10#${depth} - 1 )) -d/)"
-        break
-      fi
-      depth=$(( 10#${depth} + 1 ))
-    done
-
-    # point to root if failed
-    if [ -z "${docsroot}" ]; then
-      docsroot="."
-    fi
-  fi
-fi
-
-echo "${docsroot}/"
-
 retype_path="$(which retype 2> /dev/null)"
 retstat="${?}"
 
@@ -108,24 +62,30 @@ echo "${destdir}"
 echo -n "Setting up configuration file: "
 
 # cf_path ensures path is converted in case we are running from windows
-config_input="$(cf_path "$(pwd)/${docsroot#./}")" || fail_nl "unable to parse input path: $(pwd)/${docsroot#./}"
 config_output="$(cf_path "${destdir}/output")" || fail_nl "unable to parse output path: ${destdir}/output"
+sedpat="s#(\"output\": *\")[^\"]+(\")#\1${config_output//#/\\#}\2#;"
 
 if [ -e retype.json ]; then
+  existing_retypejson=true
   echo -n "/retype.json"
   cp retype.json "${destdir}/retype.json"
   echo -n ", "
 else
+  existing_retypejson=false
   cd "${destdir}"
   echo -n "initializing default retype.json"
   result="$(retype init --verbose 2>&1)" || \
     fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
+
+  if [ -z "${INPUT_PROJECT_NAME}" ]; then
+    sedpat="${sedpat}
+        s#(\"title\": *\")[^\"]+(\")#\1${GITHUB_REPOSITORY##*/}\2#;"
+  fi
+
   cd - > /dev/null 2>&1
 fi
 
 echo -n "update"
-sedpat="s#(\"input\": *\")[^\"]+(\")#\1${config_input//#/\\#}\2#;
-        s#(\"output\": *\")[^\"]+(\")#\1${config_output//#/\\#}\2#;"
 
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
   sedpat="${sedpat}
@@ -142,11 +102,20 @@ inplace_sed "${sedpat}" "${destdir}/retype.json"
 echo ", done."
 
 echo -n "Building documentation: "
-cd "${destdir}"
-result="$(retype build --verbose 2>&1)" || \
-  fail_cmd true "retype build command failed with exit code ${retstat}" "retype build --verbose" "${result}"
+result="$(cp "${destdir}/retype.json" . 2>&1)" || \
+  fail_cmd true "unable to deploy adjusted retype.json file to repo root" "cp \"${destdir}/retype.json\"" "${result}"
 
-cd - > /dev/null 2>&1
+result="$(retype build "retype.json" --verbose 2>&1)" || \
+  fail_cmd true "retype build command failed with exit code ${retstat}" "retype build \"${destdir}/retype.json\" --verbose" "${result}"
+
+if ${existing_retypejson}; then
+  result="$(git checkout -- "retype.json" 2>&1)" || {
+    echo "::warning::Unable to revert temporary changes to retype.json in the repository. This may affect next steps relying in the git state."
+  }
+else
+  # we may safely ignore if this errors, which is unlikely to happen.
+  result="$(rm retype.json 2>&1)"
+fi
 
 echo -n "done.
 Documentation built to: ${destdir}/output"
