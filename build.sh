@@ -153,6 +153,7 @@ Documentation built to: ${destdir}/output"
 if [ "${config_output}" != "${destdir}/output" ]; then
   echo -n " (${config_output})"
 fi
+echo "" # break line after the message above is done being composed.
 
 echo "::set-output name=retype-output-root::${destdir}"
 echo "RETYPE_OUTPUT_ROOT=${destdir}" >> "${GITHUB_ENV}"
