@@ -124,17 +124,17 @@ else
 fi
 
 echo -n "update"
-sedpat="s#(\"input\": *\")[^\"](\")#\1${config_input//#/\\#}\2#;
-        s#(\"output\": *\")[^\"](\")#\1${config_output//#/\\#}\2#;"
+sedpat="s#(\"input\": *\")[^\"]+(\")#\1${config_input//#/\\#}\2#;
+        s#(\"output\": *\")[^\"]+(\")#\1${config_output//#/\\#}\2#;"
 
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
   sedpat="${sedpat}
-        s#(\"base\": *\")[^\"](\")#\1${INPUT_OVERRIDE_BASE//#/\\#}\2#;"
+        s#(\"base\": *\")[^\"]+(\")#\1${INPUT_OVERRIDE_BASE//#/\\#}\2#;"
 fi
 
 if [ ! -z "${INPUT_PROJECT_NAME}" ]; then
   sedpat="${sedpat}
-        s#(\"title\": *\")[^\"](\")#\1${INPUT_PROJECT_NAME//#/\\#}\2#;"
+        s#(\"title\": *\")[^\"]+(\")#\1${INPUT_PROJECT_NAME//#/\\#}\2#;"
 fi
 
 inplace_sed "${sedpat}" "${destdir}/retype.json"
