@@ -90,7 +90,7 @@ fi
 if [ ! -z "${INPUT_PROJECT_NAME}" ]; then
   sedpat="${sedpat}
         s#(\"title\": *\")[^\"]+(\")#\1${INPUT_PROJECT_NAME//#/\\#}\2#;"
-elif ! ${existing_retypejson}
+elif ! ${existing_retypejson}; then
   sedpat="${sedpat}
         s#(\"title\": *\")[^\"]+(\")#\1${GITHUB_REPOSITORY##*/}\2#;"
 fi
