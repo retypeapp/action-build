@@ -11,13 +11,6 @@ $(mount)
 ${abortbuildmsg}"
   fi
 
-  # MSYS's git will insist in turning LF files into CRLF.
-  # We don't need to touch them.
-  git config core.autocrlf false
-  git config core.eol native
-  git reset --quiet --hard HEAD -- .
-  git checkout --quiet -- .
-
   function cf_path() {
     local linuxpath="${@}"
     local drivepath
