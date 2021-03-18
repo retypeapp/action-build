@@ -125,4 +125,19 @@ echo "" # break line after the message above is done being composed.
 echo "::set-output name=retype-output-root::${destdir}"
 echo "RETYPE_OUTPUT_ROOT=${destdir}" >> "${GITHUB_ENV}"
 
-echo "Retype documentation build completed successfully."
+# perform a quick clean-up to remove temporary, untracked files
+echo -n "Cleaning up repository: git-reset"
+
+result="$(git reset HEAD -- . 2>&1)" || \
+  fail_cmd comma "unable to git-reset repository back to HEAD after Retype build." "git checkout -- ." "${result}"
+
+echo -n ", git-checkout"
+result="$(git checkout -- . 2>&1)" || \
+  fail_cmd comma "unable to git-checkout repository afresh after Retype build." "git checkout -- ." "${result}"
+
+echo -n ", git-clean"
+result="$(git clean -d -x -q -f 2>&1)" || \
+  fail_cmd comma "unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
+
+echo ", done.
+Retype documentation build completed successfully."
