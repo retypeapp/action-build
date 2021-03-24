@@ -2,12 +2,14 @@ abortbuildmsg="Aborting documentation build process."
 
 function append_json() {
   local json="${1}" key="${2}" val="${3}"
-  local sedpat=":a; N; \$!ba; s/\n/\\\\n/g;s/\"/\\\\\"/g"
+  local sedpats=(":a; N; \$!ba; s/\n/\\\\n/g;s/\r//g" "s/\"/\\\\\"/g")
 
   # replace newlines to \n in key and value and " to \"
 
-  key="$(echo "${key}" | sed -E "${sedpat}")" || return 1
-  val="$(echo "${val}" | sed -E "${sedpat}")" || return 1
+  for sedpat in "${sedpats[@]}"; do
+    key="$(echo "${key}" | sed -E "${sedpat}")" || return 1
+    val="$(echo "${val}" | sed -E "${sedpat}")" || return 1
+  done
 
   if [ ${#json} -gt 0 ]; then
     json="${json},
