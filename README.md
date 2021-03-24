@@ -85,8 +85,8 @@ jobs:
 
       - shell: bash
         env:
-          RETYPE_BUILT_PATH: ${{ steps.build1.outputs.retype-output-root }}
-        run: echo "Retype config is at '${RETYPE_BUILT_PATH}' and the actual output at '${RETYPE_BUILT_PATH}/output'."
+          RETYPE_BUILD_PATH: ${{ steps.build1.outputs.retype-output-root }}
+        run: echo "Retype config is at '${RETYPE_BUILT_PATH}' and the actual output at '${RETYPE_BUILT_PATH}'."
 ```
 
 Other retype actions internally rely on the `RETYPE_OUTPUT_ROOT` environment variable exported by this action, but to ensure your action will work with future versions, it is safer to reference the explicit output value.
@@ -113,9 +113,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          path: ${{ steps.build1.outputs.retype-output-root }}/output
+          path: ${{ steps.build1.outputs.retype-output-root }}
 ```
 
-**Notice:** If only `${{ steps.build1.outputs.retype-output-root }}` is used in **upload-artifact**'s `path` argument, the artifact will include the actual used `retype.json` file during the document build. Then the actual web files will be within the artifact's **output/** subdirectory. This may be useful for reference on the settings used to build that particular version.
-
-For more information on uplkoad artifact, see https://github.com/actions/upload-artifact.
+For more information on upload artifact, see https://github.com/actions/upload-artifact.

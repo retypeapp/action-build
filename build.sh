@@ -62,24 +62,19 @@ echo "${destdir}"
 echo -n "Setting up build arguments: "
 
 # cf_path ensures path is converted in case we are running from windows
-config_output="$(cf_path "${destdir}/output")" || fail_nl "unable to parse output path: ${destdir}/output"
+config_output="$(cf_path "${destdir}")" || fail_nl "unable to parse output path: ${destdir}"
 cmdargs=(--verbose)
 overridestr="$(append_json "" "output" "${config_output}")" || \
   fail_nl "Unable to append output path setting while building the 'retype build' argument list."
 
 if [ -e retype.json ]; then
   missing_retypejson=false
-  echo -n "/retype.json"
-  cp retype.json "${destdir}/retype.json"
-  echo -n ", "
+  echo -n "/retype.json, "
 else
   missing_retypejson=true
-  cd "${destdir}"
   echo -n "initialize default retype.json"
   result="$(retype init --verbose 2>&1)" || \
     fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
-
-  cd - > /dev/null 2>&1
 fi
 
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
@@ -101,17 +96,12 @@ echo ", done."
 
 echo -n "Building documentation: "
 
-if ${missing_retypejson}; then
-  result="$(cp "${destdir}/retype.json" . 2>&1)" || \
-    fail_cmd true "unable to copy default retype.json file into repo root" "cp \"${destdir}/retype.json\"" "${result}"
-fi
-
 cmdln=(retype build "${cmdargs[@]}")
 result="$("${cmdln[@]}" 2>&1)" || \
   fail_cmd true "retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"
 
-if [ ! -d "${destdir}/output" ]; then
-  fail_nl "Retype output directory was not found after 'retype build' run."
+if [ ! -e "${destdir}/resources/js/config.js" ]; then
+  fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output."
 fi
 
 echo "done."
@@ -121,8 +111,8 @@ if ${missing_retypejson}; then
     fail_cmd true "unable to remove default retype.json placed into repo root" "rm \"retype.json\"" "${result}"
 fi
 
-echo -n "Documentation built to: ${destdir}/output"
-if [ "${config_output}" != "${destdir}/output" ]; then
+echo -n "Documentation built to: ${destdir}"
+if [ "${config_output}" != "${destdir}" ]; then
   echo -n " (${config_output})"
 fi
 echo "" # break line after the message above is done being composed.
