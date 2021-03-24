@@ -7,6 +7,9 @@ inputs:
   base:
     description: 'Value to override retype.json''s "base" config with'
     required: false
+  license:
+    description: 'License key to use with Retype'
+    required: false
 outputs:
   retype-output-root:
     description: "Path to the built retype root (will have retype.json and output/ with the actual build output)."
@@ -20,3 +23,4 @@ runs:
       env:
         INPUT_PROJECT_NAME: ${{ inputs.project-name }}
         INPUT_OVERRIDE_BASE: ${{ inputs.base }}
+        INPUT_LICENSE_KEY: ${{ inputs.license }}

@@ -63,6 +63,25 @@ steps:
 
 While this may help get started with documentation when there's no **retype.json** file in the repository's root, it's best to define the project name in the config file (`title` setting).
 
+## Specify Retype license key
+
+The `license` setting in **retype.json** can be securely specified with the `license` action input. Please make sure to use it as a secret.
+
+```yaml
+steps:
+- uses: actions/checkout@v2
+
+- uses: actions/setup-dotnet@v1
+  with:
+    dotnet-version: 5.0.x
+
+- uses: retypeapp/action-build
+  with:
+    license: ${{ secrets.RETYPE_LICENSE_KEY }}
+```
+
+For more information on how to set up and use secrets in GitHub actions, see [Encrypted secrets at GitHub Docs](https://docs.github.com/en/actions/reference/encrypted-secrets).
+
 ## Using the output path in a custom action
 
 It is possible to get the output path of the built Retype documentation website to use with custom steps/actions after **retype build** action is done. To do so, use the action's `retype-output-root` **output** value.

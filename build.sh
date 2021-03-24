@@ -87,6 +87,11 @@ if [ ! -z "${INPUT_PROJECT_NAME}" ]; then
     fail_nl "Unable to append project name (title) setting while building the 'retype build' argument list."
 fi
 
+if [ ! -z "${INPUT_LICENSE_KEY}" ]; then
+  overridestr="$(append_json "${overridestr}" "license" "${INPUT_LICENSE_KEY}")" || \
+    fail_nl "Unable to append license key setting while building the 'retype build' argument list."
+fi
+
 overridestr="{
 ${overridestr}
 }"
