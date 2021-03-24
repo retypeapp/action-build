@@ -1,6 +1,6 @@
 #!/bin/bash
 
-retype_version="1.1.0"
+retype_version="1.2.0"
 
 use_dotnet=false
 _ifs="${IFS}"
@@ -59,64 +59,69 @@ echo -n "Determining temporary target folder to place parsed documentation: "
 destdir="$(mktemp -d)"
 echo "${destdir}"
 
-echo -n "Setting up configuration file: "
+echo -n "Setting up build arguments: "
 
 # cf_path ensures path is converted in case we are running from windows
 config_output="$(cf_path "${destdir}/output")" || fail_nl "unable to parse output path: ${destdir}/output"
-sedpat="s#(\"output\": *\")[^\"]+(\")#\1${config_output//#/\\#}\2#;"
+cmdargs=(--verbose)
+overridestr="$(append_json "" "output" "${config_output}")" || \
+  fail_nl "Unable to append output path setting while building the 'retype build' argument list."
 
 if [ -e retype.json ]; then
-  existing_retypejson=true
+  missing_retypejson=false
   echo -n "/retype.json"
   cp retype.json "${destdir}/retype.json"
   echo -n ", "
 else
-  existing_retypejson=false
+  missing_retypejson=true
   cd "${destdir}"
-  echo -n "initializing default retype.json"
+  echo -n "initialize default retype.json"
   result="$(retype init --verbose 2>&1)" || \
     fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
 
   cd - > /dev/null 2>&1
 fi
 
-echo -n "update"
-
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
-  sedpat="${sedpat}
-        s#(\"base\": *\")[^\"]+(\")#\1${INPUT_OVERRIDE_BASE//#/\\#}\2#;"
+  overridestr="$(append_json "${overridestr}" "base" "${INPUT_OVERRIDE_BASE}")" || \
+    fail_nl "Unable to append base site path setting while building the 'retype build' argument list."
 fi
 
 if [ ! -z "${INPUT_PROJECT_NAME}" ]; then
-  sedpat="${sedpat}
-        s#(\"title\": *\")[^\"]+(\")#\1${INPUT_PROJECT_NAME//#/\\#}\2#;"
-elif ! ${existing_retypejson}; then
-  sedpat="${sedpat}
-        s#(\"title\": *\")[^\"]+(\")#\1${GITHUB_REPOSITORY##*/}\2#;"
+  overridestr="$(append_json "${overridestr}" "title" "${INPUT_PROJECT_NAME}")" || \
+    fail_nl "Unable to append project name (title) setting while building the 'retype build' argument list."
 fi
 
-inplace_sed "${sedpat}" "${destdir}/retype.json"
+overridestr="{
+${overridestr}
+}"
+cmdargs+=("--override", "${overridestr}")
 
 echo ", done."
 
 echo -n "Building documentation: "
-result="$(cp "${destdir}/retype.json" . 2>&1)" || \
-  fail_cmd true "unable to deploy adjusted retype.json file to repo root" "cp \"${destdir}/retype.json\"" "${result}"
 
-result="$(retype build "retype.json" --verbose 2>&1)" || \
-  fail_cmd true "retype build command failed with exit code ${retstat}" "retype build \"${destdir}/retype.json\" --verbose" "${result}"
-
-if ${existing_retypejson}; then
-  result="$(git checkout -- "retype.json" 2>&1)" || {
-    echo "::warning::Unable to revert temporary changes to retype.json in the repository. This may affect next steps relying in the git state."
-  }
-else
-  # we may safely ignore if this errors, which is unlikely to happen.
-  result="$(rm retype.json 2>&1)"
+if ${missing_retypejson}; then
+  result="$(cp "${destdir}/retype.json" . 2>&1)" || \
+    fail_cmd true "unable to copy default retype.json file into repo root" "cp \"${destdir}/retype.json\"" "${result}"
 fi
 
-echo -n "done.
-Documentation built to: ${destdir}/output"
+cmdln=(retype build "${cmdargs[@]}")
+result="$("${cmdln[@]}" 2>&1)" || \
+  fail_cmd true "retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"
+
+if [ ! -d "${destdir}/output" ]; then
+  fail_nl "Retype output directory was not found after 'retype build' run."
+fi
+
+echo "done."
+
+if ${missing_retypejson}; then
+  result="$(rm "retype.json" 2>&1)" || \
+    fail_cmd true "unable to remove default retype.json placed into repo root" "rm \"retype.json\"" "${result}"
+fi
+
+echo -n "Documentation built to: ${destdir}/output"
 if [ "${config_output}" != "${destdir}/output" ]; then
   echo -n " (${config_output})"
 fi

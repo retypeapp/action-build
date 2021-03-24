@@ -1,5 +1,22 @@
 abortbuildmsg="Aborting documentation build process."
 
+function append_json() {
+  local json="${1}" key="${2}" val="${3}"
+  local sedpat=":a; N; \$!ba; s/\n/\\\\n/g;s/\"/\\\\\"/g"
+
+  # replace newlines to \n in key and value and " to \"
+
+  key="$(echo "${key}" | sed -E "${sedpat}")" || return 1
+  val="$(echo "${val}" | sed -E "${sedpat}")" || return 1
+
+  if [ ${#json} -gt 0 ]; then
+    json="${json},
+"
+  fi
+
+  echo -n "${json}  \"${key}\": \"${val}\""
+}
+
 if [ "${OSTYPE}" == "msys" ]; then
   MSYS_TMPDIR="$(mount | egrep "^[^ ]+ on /tmp type" | cut -f1 -d" ")"
 
@@ -77,13 +94,3 @@ ${abortbuildmsg}"
     fail "${multiline_msg}"
   fi
 }
-
-if [ "${OSTYPE::6}" == "darwin" ]; then
-  function inplace_sed() {
-    sed -Ei '' "${@}"
-  }
-else
-  function inplace_sed() {
-    sed -Ei "${@}"
-  }
-fi
