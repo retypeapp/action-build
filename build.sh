@@ -90,7 +90,7 @@ fi
 overridestr="{
 ${overridestr}
 }"
-cmdargs+=("--override", "${overridestr}")
+cmdargs+=("--override" "${overridestr}")
 
 echo ", done."
 
