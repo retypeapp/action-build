@@ -2,7 +2,7 @@ abortbuildmsg="Aborting documentation build process."
 
 function append_json() {
   local json="${1}" key="${2}" val="${3}"
-  local sedpats=(":a; N; \$!ba; s/\n/\\\\n/g;s/\r//g" "s/\"/\\\\\"/g")
+  local sedpats=("s/(\"|\\\\)/\\\\\1/g" ":a; N; \$!ba; s/\n/\\\\n/g;s/\r//g")
 
   # replace newlines to \n in key and value and " to \"
 
