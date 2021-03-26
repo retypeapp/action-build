@@ -1,4 +1,5 @@
 name: 'Retype documentation builder'
+author: Object.NET, Inc.
 description: 'Use this action to build documentation from your repository and push it to your gh-pages branch.'
 inputs:
   project-name:
