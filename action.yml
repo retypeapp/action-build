@@ -1,19 +1,26 @@
-name: 'Retype documentation builder'
+name: Retype Build Action
 author: Object.NET, Inc.
-description: 'Use this action to build documentation from your repository and push it to your gh-pages branch.'
+description: |-
+  Builds documentation on repository using Retype. The built output can then be
+  published to your preferred hosting service via following workflow steps in
+  the same job.
 inputs:
   project-name:
-    description: 'The name of the project being documented'
+    description: 'The name of the project'
     required: false
   base:
     description: 'Value to override retype.json''s "base" config with'
     required: false
   license:
-    description: 'License key to use with Retype'
+    description: |-
+      License key to use with Retype. The Retype license key is private, so
+      you should provide it from an encrypted source like  a repository secret.
     required: false
 outputs:
   retype-output-root:
-    description: "Path to the built retype root (will have retype.json and output/ with the actual build output)."
+    description: |-
+      Path to the built retype root that can be referenced from other steps in
+      the same job to publish built documentation.
     value: ${{ steps.retype-build.outputs.retype-output-root }}
 runs:
   using: "composite"
