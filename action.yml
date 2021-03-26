@@ -1,9 +1,9 @@
 name: Retype Build Action
 author: Object.NET, Inc.
 description: |-
-  Builds documentation on repository using Retype. The built output can then be
-  published to your preferred hosting service via following workflow steps in
-  the same job.
+Builds documentation using Retype. The built output from this step can be
+published to the hosting of choice.
+
 inputs:
   project-name:
     description: 'The name of the project'
