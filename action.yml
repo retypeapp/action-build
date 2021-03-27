@@ -1,6 +1,6 @@
 name: Retype Build Action
 author: Object.NET, Inc.
-description: |
+description: |-
   Builds documentation using Retype. The built output from this step can be
   published to the hosting of choice.
 inputs:
@@ -11,13 +11,13 @@ inputs:
     description: 'Value to override retype.json''s "base" config with'
     required: false
   license:
-    description: |
+    description: |-
       License key to use with Retype. The Retype license key is private, so
       you should provide it from an encrypted source like  a repository secret.
     required: false
 outputs:
   retype-output-root:
-    description: |
+    description: |-
       Path to the built retype root that can be referenced from other steps in
       the same job to publish built documentation.
     value: ${{ steps.retype-build.outputs.retype-output-root }}
