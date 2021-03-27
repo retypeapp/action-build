@@ -1,9 +1,8 @@
 name: Retype Build Action
 author: Object.NET, Inc.
 description: |-
-Builds documentation using Retype. The built output from this step can be
-published to the hosting of choice.
-
+  Builds documentation using Retype. The built output from this step can be
+  published to the hosting of choice.
 inputs:
   project-name:
     description: 'The name of the project'
