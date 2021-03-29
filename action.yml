@@ -1,25 +1,25 @@
 name: Retype Build Action
 author: Object.NET, Inc.
 description: |-
-  Builds documentation using Retype. The built output from this step can be
-  published to the hosting of choice.
+  Builds a Retype powered website. The build output from this step can be
+  published to any web hosting service, such as GitHub Pages.
 inputs:
   project-name:
     description: 'The name of the project'
     required: false
   base:
-    description: 'Value to override retype.json''s "base" config with'
+    description: 'Value to the override retype.json "base" config'
     required: false
   license:
     description: |-
-      License key to use with Retype. The Retype license key is private, so
-      you should provide it from an encrypted source like  a repository secret.
+      License key to use with Retype. The Retype license key is private.
+      Please store your license key as a GitHub secret.
     required: false
 outputs:
   retype-output-root:
     description: |-
-      Path to the built retype root that can be referenced from other steps in
-      the same job to publish built documentation.
+      Path to the Retype output that can be referenced in other steps
+      within the same workflow.
     value: ${{ steps.retype-build.outputs.retype-output-root }}
 runs:
   using: "composite"
