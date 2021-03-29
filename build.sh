@@ -79,17 +79,26 @@ fi
 
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
   overridestr="$(append_json "${overridestr}" "base" "${INPUT_OVERRIDE_BASE}")" || \
-    fail_nl "Unable to append base site path setting while building the 'retype build' argument list."
+    fail_nl "Unable to append 'base' setting while building the 'retype build' argument list."
 fi
 
-if [ ! -z "${INPUT_PROJECT_NAME}" ]; then
-  overridestr="$(append_json "${overridestr}" "title" "${INPUT_PROJECT_NAME}")" || \
-    fail_nl "Unable to append project name (title) setting while building the 'retype build' argument list."
+if [ ! -z "${INPUT_OVERRIDE_TITLE}" ]; then
+  identitytitle="$(append_json "" "title" "${INPUT_OVERRIDE_TITLE}")" || \
+    fail_nl "Unable to append 'title' setting while building the 'retype build' argument list."
+
+  if [ ! -z "${overridestr}" ]; then
+    overridestr="${overridestr},
+"
+  fi
+
+  overridestr="${overridestr}  \"identity\": {
+  ${identitytitle}
+  }"
 fi
 
 if [ ! -z "${INPUT_LICENSE_KEY}" ]; then
   overridestr="$(append_json "${overridestr}" "license" "${INPUT_LICENSE_KEY}")" || \
-    fail_nl "Unable to append license key setting while building the 'retype build' argument list."
+    fail_nl "Unable to append 'license' setting while building the 'retype build' argument list."
 fi
 
 overridestr="{

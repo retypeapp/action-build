@@ -1,6 +1,6 @@
 # Retype APP GitHub Actions - Build
 
-A GitHub Action to build a [Retype](https://retype.com/) powered website. The output of this action is then made available for subsequent workflow steps, such as publishing to GitHub Pages using the [retypeapp/action-github-pages](https://github.com/retypeapp/action-github-pages) action. 
+A GitHub Action to build a [Retype](https://retype.com/) powered website. The output of this action is then made available for subsequent workflow steps, such as publishing to GitHub Pages using the [retypeapp/action-github-pages](https://github.com/retypeapp/action-github-pages) action.
 
 The output of this step can be published to any website hosting service.
 
@@ -43,15 +43,15 @@ The `base` can also be set in the project `retype.json` file.
 
 ### `license`
 
-Specifies the license key to be used with Retype. 
+Specifies the license key to be used with Retype.
 
 **WARNING**: Never save the `license` key value to your `retype.yaml` or `retype.json` files. Use a GitHub Secret to store the value. For information on how to set up secrets, see [Encrypted Secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
-### `project-name`
+### `title`
 
-Specifies a given title to be used for the generated website. 
+Specifies a given title to be used for the generated website.
 
-Passing the `title` value will override the `identity.title` value provided in the `retype.json` or the default value used by Retype in casees where no `retype.json` is available.
+Passing the `title` value will override the `identity.title` value provided in the `retype.json` or the default value used by Retype in cases where no `retype.json` is available.
 
 ## Examples
 
@@ -80,7 +80,7 @@ steps:
 
 ## Specify a custom `base` directory
 
-If the output is not hosted from the website root folder, a `base` needs to be explicitly configured. 
+If the output is not hosted from the website root folder, a `base` needs to be explicitly configured.
 
 The `base` would typically be configured in the `retype.json` file.
 
@@ -97,14 +97,14 @@ The `base` would typically be configured in the `retype.json` file.
 
 The example above is useful to set up GitHub Pages using the `repo-owner.github.io/repo-name` path for hosting documentation built by Retype. For more information, see [Working with GitHub Pages](https://docs.github.com/en/github/working-with-github-pages).
 
-## Specify a custom project name
+## Specify a custom documentation website title
 
-The `title` setting in `retype.json` can be overridden with the `project-name` action input.
+The `title` setting in `retype.json` can be overridden with the `title` action input.
 
 ```yaml
 - uses: retypeapp/action-build
   with:
-    project-name: "My Project"
+    title: "My Project"
 ```
 
 While this may help get started when no `retype.json` file is available, it is best to define the project name in the projects `retype.json` file within `identity.title` setting. See [Project configuration](https://retype.com/configuration/project/) for more details.

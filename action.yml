@@ -4,11 +4,11 @@ description: |-
   Builds a Retype powered website. The build output from this step can be
   published to any web hosting service, such as GitHub Pages.
 inputs:
-  project-name:
-    description: 'The name of the project'
+  title:
+    description: Value to override retype.json's "title" config
     required: false
   base:
-    description: 'Value to the override retype.json "base" config'
+    description: Value to override retype.json's "base" config
     required: false
   license:
     description: |-
@@ -28,6 +28,6 @@ runs:
       run: "${GITHUB_ACTION_PATH}/build.sh"
       shell: bash
       env:
-        INPUT_PROJECT_NAME: ${{ inputs.project-name }}
+        INPUT_OVERRIDE_TITLE: ${{ inputs.title }}
         INPUT_OVERRIDE_BASE: ${{ inputs.base }}
         INPUT_LICENSE_KEY: ${{ inputs.license }}
