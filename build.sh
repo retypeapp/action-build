@@ -117,8 +117,8 @@ if [ "${config_output}" != "${destdir}" ]; then
 fi
 echo "" # break line after the message above is done being composed.
 
-echo "::set-output name=retype-output-root::${destdir}"
-echo "RETYPE_OUTPUT_ROOT=${destdir}" >> "${GITHUB_ENV}"
+echo "::set-output name=retype-output-PATH::${destdir}"
+echo "RETYPE_OUTPUT_PATH=${destdir}" >> "${GITHUB_ENV}"
 
 # perform a quick clean-up to remove temporary, untracked files
 echo -n "Cleaning up repository: git-reset"

@@ -13,11 +13,11 @@ inputs:
       Please store your license key as a GitHub secret.
     required: false
 outputs:
-  retype-output-root:
+  retype-output-path:
     description: |-
       Path to the Retype output that can be referenced in other steps
       within the same workflow.
-    value: ${{ steps.retype-build.outputs.retype-output-root }}
+    value: ${{ steps.retype-build.outputs.retype-output-path }}
 runs:
   using: "composite"
   steps:
