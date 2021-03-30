@@ -33,16 +33,6 @@ steps:
 
 Configuration of the project should be done in the projects [`retype.json`](https://retype.com/configuration/project) file.
 
-### `base`
-
-The [`base`](https://retype.com/configuration/project#base) subfolder path appended to URL's.
-
-The `base` is required if the target host will prefix a path to your website, such as the repository name with GitHub Pages hosting. 
-
-For instance, https://example.com/docs/ would require `base: docs` to be configured. The path https://example.com/en/ would require `base: en` to be configured.
-
-The `base` can also be configured in the project `retype.json` file.
-
 ### `license`
 
 Specifies the license key to be used with Retype.
@@ -83,25 +73,6 @@ Here are a few common workflow scenarios.
 steps:
   - uses: retypeapp/action-build
 ```
-
-## Specify a custom `base` directory
-
-If the output is not hosted from the website root folder, a `base` must be explicitly configured.
-
-The `base` would typically be configured in the `retype.json` file.
-
-```yaml
-- name: Sets a variable with the repository name, stripping out owner/organization
-  id: clean-repo-name
-  shell: bash
-  run: echo "::set-output name=repository_name::${GITHUB_REPOSITORY#${{ github.repository_owner }}/}"
-
-- uses: retypeapp/action-build
-  with:
-    base: "${{ steps.clean-repo-name.outputs.repository_name }}"
-```
-
-The example above is useful to set up GitHub Pages using the `repo-owner.github.io/repo-name` path for hosting documentation built by Retype. For more information, see [Working with GitHub Pages](https://docs.github.com/en/github/working-with-github-pages).
 
 ## Specify a Retype license key
 
