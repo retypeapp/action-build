@@ -1,20 +1,20 @@
-# Retype APP GitHub Actions - Build
+# Retype Build Action
 
-A GitHub Action to build a [Retype](https://retype.com/) powered website. The output of this action is then made available for subsequent workflow steps, such as publishing to GitHub Pages using the [retypeapp/action-github-pages](https://github.com/retypeapp/action-github-pages) action.
-
-The output of this step can be published to any website hosting service.
+A GitHub Action to build a [Retype](https://retype.com/) powered website. The output of this action is then made available to subsequent workflow steps, such as publishing to GitHub Pages using the [retypeapp/action-github-pages](https://github.com/retypeapp/action-github-pages) action.
 
 ## Introduction
 
-This action runs `retype build` over the repository to build a website in the form of a static web site that can be published to any website hosting solution available.
+This action runs `retype build` over the files in a repository to build a website in the form of a static html website that can be published to any website hosting solution available.
 
-After the action completes, it will export the `retype-output-root` value for the next steps to handle the output. These output files can then be pushed back to GitHub (for GitHub Pages hosted websites), or sent by FTP to another web server, or any other form of website publication target.
+After the action completes, the action will export the `retype-output-root` value for the next steps to handle the output. The output files can then be pushed back to GitHub, or sent by FTP to another web server, or any other form of website publication target.
 
 This action will look for a [`retype.json`](https://retype.com/configuration/project/) file in the repository root.
 
 ## Prerequisites
 
-We highly recommend configuring the [actions/setup-dotnet](https://github.com/actions/setup-dotnet) step before `retypeapp/action-build`. This will install the tiny `dotnet` Retype package instead of the larger self-contained NPM package. Both the `dotnet` and `npm` packages run the exact same version of Retype, it's just the size of the `dotnet` package is much smaller, so the action will setup faster.
+We highly recommend configuring the [actions/setup-dotnet](https://github.com/actions/setup-dotnet) step before `retypeapp/action-build`. This will install the tiny `dotnet` Retype package instead of the larger self-contained NPM package. 
+
+Both the `dotnet` and `npm` packages run the exact same version of Retype. The size of the `dotnet` package is much smaller, so the action will setup faster.
 
 ## Usage
 
@@ -31,56 +31,68 @@ steps:
 
 ## Inputs
 
+Configuration of the project should be done in the projects [`retype.json`](https://retype.com/configuration/project) file.
+
 ### `base`
 
-The [`base`](https://retype.com/configuration/project#base) subfolder path appended to URL.
+The [`base`](https://retype.com/configuration/project#base) subfolder path appended to URL's.
 
-- **Default:** null
+The `base` is required if the target host will prefix a path to your website, such as the repository name with GitHub Pages hosting. 
 
-The `base` is required if the target host will prefix a path to your website, such as the repository name with GitHub Pages hosting. For instance, https://example.com/docs/ would require `base: docs` to be configured. The path https://example.com/en/ would require `base: en` to be configured.
+For instance, https://example.com/docs/ would require `base: docs` to be configured. The path https://example.com/en/ would require `base: en` to be configured.
 
-The `base` can also be set in the project `retype.json` file.
+The `base` can also be configured in the project `retype.json` file.
+
+### `title`
+
+Specifies a title to be used for the generated website.
+
+Passing the `title` value will override the `branding.title` value provided in the `retype.json` or the default value used by Retype in cases where no `retype.json` is available.
 
 ### `license`
 
 Specifies the license key to be used with Retype.
 
-**WARNING**: Never save the `license` key value to your `retype.yaml` or `retype.json` files. Use a GitHub Secret to store the value. For information on how to set up secrets, see [Encrypted Secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
-
-### `title`
-
-Specifies a given title to be used for the generated website.
-
-Passing the `title` value will override the `identity.title` value provided in the `retype.json` or the default value used by Retype in cases where no `retype.json` is available.
+**WARNING**: Never save the `license` key value directly to your `retype.yaml` or `retype.json` files. Please use a GitHub Secret to store the value. For information on how to configure a secret, see [Encrypted Secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
 ## Examples
 
-Here are some simple and common workflow scenarios. For most of the examples below, the following `retype.yaml` workflow file will serve as our starting template.
+The following `retype.yaml` workflow file will serve as our starting template for most of the samples below.
 
 ```yaml
-name: document
-on: push
+name: GitHub Action for Retype
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
 jobs:
-  job1:
+  publish:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
 
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
+
+      - uses: retypeapp/action-build@v1
 ```
 
-### Basic scenario using recommended dependencies:
+Here are a few common workflow scenarios. 
+
+### Most common setup
 
 ```yaml
 steps:
-- uses: retypeapp/action-build
+  - uses: retypeapp/action-build
 ```
 
 ## Specify a custom `base` directory
 
-If the output is not hosted from the website root folder, a `base` needs to be explicitly configured.
+If the output is not hosted from the website root folder, a `base` must be explicitly configured.
 
 The `base` would typically be configured in the `retype.json` file.
 
@@ -107,11 +119,11 @@ The `title` setting in `retype.json` can be overridden with the `title` action i
     title: "My Project"
 ```
 
-While this may help get started when no `retype.json` file is available, it is best to define the project name in the projects `retype.json` file within `identity.title` setting. See [Project configuration](https://retype.com/configuration/project/) for more details.
+While this may help get started when no `retype.json` file is available, it is best to define the project name within the projects `retype.json` file within `branding.title` setting. See [Project configuration](https://retype.com/configuration/project/) for more details.
 
-## Specify Retype license key
+## Specify a Retype license key
 
-If a `license` is required, please configure using a GitHub secret.
+If a `license` key is required, please configure using a GitHub Secret.
 
 ```yaml
 - uses: retypeapp/action-build
@@ -121,9 +133,9 @@ If a `license` is required, please configure using a GitHub secret.
 
 For more information on how to set up and use secrets in GitHub actions, see [Encrypted secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
-## Using the output path in a custom action
+## Passing the output path to another action
 
-It is possible to get the output path of the built Retype documentation website to use with custom steps/actions after the `action-build` is complete. To do so, use the `retype-output-root` value.
+It is possible to get the output path of this step to use in other steps or actions after the `action-build` is complete by using the `retype-output-root` value.
 
 ```yaml
 - uses: retypeapp/action-build
@@ -135,13 +147,13 @@ It is possible to get the output path of the built Retype documentation website 
   run: echo "Retype config is at '${RETYPE_BUILT_PATH}' and the actual output at '${RETYPE_BUILT_PATH}'."
 ```
 
-Other Retype actions within the workflow may rely on the output of this action by using the `RETYPE_OUTPUT_ROOT` environment variable, but to ensure your action will work with future versions, it is safer to reference the explicit output value.
+Other Retype actions within the workflow may consume the output of this action by using the `RETYPE_OUTPUT_ROOT` environment variable.
 
-If the custom action runs on another job, see the next example for means to persist the built documentation website.
+It is required to upload the output with [actions/upload-artifact](https://github.com/actions/upload-artifact), as changes in the file system are not available across different GitHub action jobs. Then from the subsequent job(s), the artifact can be retrieved using the `download-artifact` action. 
 
-It is required to actually upload the built documentation with [actions/upload-artifact](https://github.com/actions/upload-artifact), as changes in the file system are not available across different GitHub action jobs. Then from the outside job, the artifact can be retrieved using the `download-artifact` action. See examples using the action below; more information on the [`upload-artifact`](https://github.com/actions/upload-artifact) and [`download-artifact`](https://github.com/actions/download-artifact) actions.
+The following sample demonstrates the [`upload-artifact`](https://github.com/actions/upload-artifact) and [`download-artifact`](https://github.com/actions/download-artifact) actions.
 
-## Uploading a Retype built website as an artifact
+## Uploading the output as an artifact
 
 To use the Retype output in another job within the same workflow, or let an external source download it, it is possible to use [`actions/upload-artifact`](https://github.com/actions/upload-artifact) to persist the files. The uploaded artifact can then be retrieved in another job or workflow using [`actions/download-artifact`](https://github.com/actions/download-artifact)
 
@@ -154,11 +166,11 @@ To use the Retype output in another job within the same workflow, or let an exte
     path: ${{ steps.build1.outputs.retype-output-root }}
 ```
 
-## Pushing back to GitHub Pages
+## Publishing to GitHub Pages
 
-By using the Retype [retypeapp/action-github-pages](https://github.com/retypeapp/action-github-pages) action, the workflow can publish the freshly built website to a `branch` or `directory` or even a make a Pull Request. The website can then be hosted using [GitHub Pages](https://docs.github.com/en/github/working-with-github-pages/getting-started-with-github-pages).
+By using the Retype [retypeapp/action-github-pages](https://github.com/retypeapp/action-github-pages) action, the workflow can publish the output to a branch, or directory, or even a make a Pull Request. The website can then be hosted using [GitHub Pages](https://docs.github.com/en/github/working-with-github-pages/getting-started-with-github-pages).
 
-The snippet below illustrates how to add GitHub Pages publishing support to a Retype Build workflow:
+The following sample demonstrates configuring the Retype `action-github-pages` action to publish to GitHub Pages:
 
 ```yaml
 - uses: retypeapp/action-build
