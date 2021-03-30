@@ -4,9 +4,6 @@ description: |-
   Builds a Retype powered website. The build output from this step can be
   published to any web hosting service, such as GitHub Pages.
 inputs:
-  title:
-    description: Value to override retype.json's "title" config
-    required: false
   base:
     description: Value to override retype.json's "base" config
     required: false
