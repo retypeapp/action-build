@@ -6,13 +6,13 @@ A GitHub Action to build a [Retype](https://retype.com/) powered website. The ou
 
 This action runs `retype build` over the files in a repository to build a website in the form of a static html website that can be published to any website hosting solution available.
 
-After the action completes, the action will export the `retype-output-root` value for the next steps to handle the output. The output files can then be pushed back to GitHub, or sent by FTP to another web server, or any other form of website publication target.
+After the action completes, the action will export the `retype-output-path` value for the next steps to handle the output. The output files can then be pushed back to GitHub, or sent by FTP to another web server, or any other form of website publication target.
 
 This action will look for a [`retype.json`](https://retype.com/configuration/project/) file in the repository root.
 
 ## Prerequisites
 
-We highly recommend configuring the [actions/setup-dotnet](https://github.com/actions/setup-dotnet) step before `retypeapp/action-build`. This will install the tiny `dotnet` Retype package instead of the larger self-contained NPM package. 
+We highly recommend configuring the [actions/setup-dotnet](https://github.com/actions/setup-dotnet) step before `retypeapp/action-build`. This will install the tiny `dotnet` Retype package instead of the larger self-contained NPM package.
 
 Both the `dotnet` and `npm` packages run the exact same version of Retype. The size of the `dotnet` package is much smaller, so the action will setup faster.
 
@@ -65,7 +65,7 @@ jobs:
       - uses: retypeapp/action-build@v1
 ```
 
-Here are a few common workflow scenarios. 
+Here are a few common workflow scenarios.
 
 ### Most common setup
 
@@ -88,7 +88,7 @@ For more information on how to set up and use secrets in GitHub actions, see [En
 
 ## Passing the output path to another action
 
-It is possible to get the output path of this step to use in other steps or actions after the `action-build` is complete by using the `retype-output-root` value.
+It is possible to get the output path of this step to use in other steps or actions after the `action-build` is complete by using the `retype-output-path` value.
 
 ```yaml
 - uses: retypeapp/action-build
@@ -96,13 +96,13 @@ It is possible to get the output path of this step to use in other steps or acti
 
 - shell: bash
   env:
-    RETYPE_BUILD_PATH: ${{ steps.build1.outputs.retype-output-root }}
-  run: echo "Retype config is at '${RETYPE_BUILT_PATH}' and the actual output at '${RETYPE_BUILT_PATH}'."
+    MY_ENV_TO_RETYPE_PATH: ${{ steps.build1.outputs.retype-output-path }}
+  run: echo "Retype output is available at '${MY_ENV_TO_RETYPE_PATH}'."
 ```
 
-Other Retype actions within the workflow may consume the output of this action by using the `RETYPE_OUTPUT_ROOT` environment variable.
+Other Retype actions within the workflow may consume the output of this action by using the `RETYPE_OUTPUT_PATH` environment variable.
 
-It is required to upload the output with [actions/upload-artifact](https://github.com/actions/upload-artifact), as changes in the file system are not available across different GitHub action jobs. Then from the subsequent job(s), the artifact can be retrieved using the `download-artifact` action. 
+It is required to upload the output with [actions/upload-artifact](https://github.com/actions/upload-artifact), as changes in the file system are not available across different GitHub action jobs. Then from the subsequent job(s), the artifact can be retrieved using the `download-artifact` action.
 
 The following sample demonstrates the [`upload-artifact`](https://github.com/actions/upload-artifact) and [`download-artifact`](https://github.com/actions/download-artifact) actions.
 
@@ -116,7 +116,7 @@ To use the Retype output in another job within the same workflow, or let an exte
 
 - uses: actions/upload-artifact@v2
   with:
-    path: ${{ steps.build1.outputs.retype-output-root }}
+    path: ${{ steps.build1.outputs.retype-output-path }}
 ```
 
 ## Publishing to GitHub Pages
