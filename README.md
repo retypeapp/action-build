@@ -43,12 +43,6 @@ For instance, https://example.com/docs/ would require `base: docs` to be configu
 
 The `base` can also be configured in the project `retype.json` file.
 
-### `title`
-
-Specifies a title to be used for the generated website.
-
-Passing the `title` value will override the `branding.title` value provided in the `retype.json` or the default value used by Retype in cases where no `retype.json` is available.
-
 ### `license`
 
 Specifies the license key to be used with Retype.
@@ -108,18 +102,6 @@ The `base` would typically be configured in the `retype.json` file.
 ```
 
 The example above is useful to set up GitHub Pages using the `repo-owner.github.io/repo-name` path for hosting documentation built by Retype. For more information, see [Working with GitHub Pages](https://docs.github.com/en/github/working-with-github-pages).
-
-## Specify a custom documentation website title
-
-The `title` setting in `retype.json` can be overridden with the `title` action input.
-
-```yaml
-- uses: retypeapp/action-build
-  with:
-    title: "My Project"
-```
-
-While this may help get started when no `retype.json` file is available, it is best to define the project name within the projects `retype.json` file within `branding.title` setting. See [Project configuration](https://retype.com/configuration/project/) for more details.
 
 ## Specify a Retype license key
 
