@@ -1,8 +1,8 @@
 name: Retype Build Action
 author: Object.NET, Inc.
 description: |-
-  Builds a Retype powered website. The build output from this step can be
-  published to any web hosting service, such as GitHub Pages.
+  Builds documentation using Retype. The built output from this step can be
+  published to the hosting of choice.
 inputs:
   base:
     description: Value to override retype.json's "base" config
