@@ -1,0 +1,12 @@
+name: Publish new Release
+on:
+  workflow_dispatch:
+jobs:
+  publish:
+    name: Sync Retype and Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update and Release
+        shell: bash
+        run: .github/workflows/refresh-release.sh --github-token="${{ secrets.GITHUB_TOKEN }}"
