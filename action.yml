@@ -12,6 +12,11 @@ inputs:
       License key to use with Retype. The Retype license key is private.
       Please store your license key as a GitHub secret.
     required: false
+  config:
+    description: |-
+      Path to the retype.json file. May point to a directory or a .json file.
+      When a directory, retype will look for 'retype.json' in that directory
+      and use it. If it is a .json file, retype will use it as 'retype.json'.
 outputs:
   retype-output-path:
     description: |-
@@ -28,3 +33,4 @@ runs:
         INPUT_OVERRIDE_TITLE: ${{ inputs.title }}
         INPUT_OVERRIDE_BASE: ${{ inputs.base }}
         INPUT_LICENSE_KEY: ${{ inputs.license }}
+        INPUT_CONFIG_PATH: ${{ inputs.config }}

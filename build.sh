@@ -15,6 +15,15 @@ source "${GITHUB_ACTION_PATH}"/functions.inc.sh || {
   exit 1
 }
 
+if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
+  if [ ! -e "${INPUT_CONFIG_PATH}" ]; then
+    fail "Path to retype config could not be found: ${INPUT_CONFIG_PATH}"
+  fi
+  echo "Specified path to retype.json: ${INPUT_CONFIG_PATH}"
+fi
+
+echo "Working directory is: $(pwd)"
+
 # We prefer dotnet if available as the package size is (much) smaller.
 if which dotnet > /dev/null 2>&1 && [ "$(dotnet --version | cut -f1 -d.)" == "5" ]; then
   use_dotnet=true
@@ -67,8 +76,13 @@ cmdargs=(--verbose)
 overridestr="$(append_json "" "output" "${config_output}")" || \
   fail_nl "Unable to append output path setting while building the 'retype build' argument list."
 
-if [ -e retype.json ]; then
-  missing_retypejson=false
+missing_retypejson=false
+if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
+  # In case path is a directory and there's no retype.json file, the process
+  # is supposed to fail (we won't try 'retype init')
+  echo -n "${INPUT_CONFIG_PATH}, "
+  cmdargs+=("${INPUT_CONFIG_PATH}")
+elif [ -e retype.json ]; then
   echo -n "/retype.json, "
 else
   missing_retypejson=true
