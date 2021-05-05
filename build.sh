@@ -75,6 +75,9 @@ else
   echo -n "initialize default retype.json"
   result="$(retype init --verbose 2>&1)" || \
     fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
+  echo "::group::Command: retype init --verbose
+${result}
+::endgroup::"
 fi
 
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
@@ -105,6 +108,10 @@ if [ ! -e "${destdir}/resources/js/config.js" ]; then
 fi
 
 echo "done."
+
+echo "::group::Command: ${cmdln[@]}
+${result}
+::endgroup::"
 
 if ${missing_retypejson}; then
   result="$(rm "retype.json" 2>&1)" || \
