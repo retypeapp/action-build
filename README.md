@@ -33,6 +33,10 @@ steps:
 
 Configuration of the project should be done in the projects [`retype.json`](https://retype.com/configuration/project) file.
 
+### `config`
+
+Specifies the path where `retype.json` file should be located or path to the specific configuration file.
+
 ### `license`
 
 Specifies the license key to be used with Retype.
@@ -85,6 +89,49 @@ If a `license` key is required, please configure using a GitHub Secret.
 ```
 
 For more information on how to set up and use secrets in GitHub actions, see [Encrypted secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
+
+## Specify path to the retype.json file
+
+It is possible to point the directory where `retype.json` is:
+
+```yaml
+- uses: retypeapp/action-build
+  with:
+    config: my_docs
+```
+
+Or the full path (relative to the repository root) to retype.json
+
+```yaml
+- uses: retypeapp/action-build
+  with:
+    config: my_docs/retype.json
+```
+
+The config file may have a different file name
+
+```yaml
+- uses: retypeapp/action-build
+  with:
+    config: my_docs/retype-staging.json
+```
+
+In a bit more complex scenario where various repositories are checked out in a workflow. This may be useful, for instance, if retype documentation is generated from files across different repositories.
+
+```yaml
+- uses: actions/checkout@v2
+  with:
+    path: own-repository
+
+- uses: actions/checkout@v2
+  with:
+    repository: organization/repository-name
+    path: auxiliary-repository
+
+- uses: retypeapp/action-build
+  with:
+    config: own-repository/my_docs/retype.json
+```
 
 ## Passing the output path to another action
 
