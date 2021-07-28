@@ -17,9 +17,9 @@ source "${GITHUB_ACTION_PATH}"/functions.inc.sh || {
 
 if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
   if [ ! -e "${INPUT_CONFIG_PATH}" ]; then
-    fail "Path to retype config could not be found: ${INPUT_CONFIG_PATH}"
+    fail "Path to Retype config could not be found: ${INPUT_CONFIG_PATH}"
   fi
-  echo "Specified path to retype.json: ${INPUT_CONFIG_PATH}"
+  echo "Path to Retype config: ${INPUT_CONFIG_PATH}"
 fi
 
 echo "Working directory is: $(pwd)"
@@ -76,17 +76,21 @@ cmdargs=(--verbose)
 overridestr="$(append_json "" "output" "${config_output}")" || \
   fail_nl "Unable to append output path setting while building the 'retype build' argument list."
 
-missing_retypejson=false
+missing_retypecf=false
 if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
-  # In case path is a directory and there's no retype.json file, the process
+  # In case path is a directory and there's no Retype conf file, the process
   # is supposed to fail (we won't try 'retype init')
   echo -n "${INPUT_CONFIG_PATH}, "
   cmdargs+=("${INPUT_CONFIG_PATH}")
+if [ -e "retype.yml" ]; then
+  echo -n "/retype.yml, "
+elif [ -e retype.yaml ]; then
+  echo -n "/retype.yaml, "
 elif [ -e retype.json ]; then
   echo -n "/retype.json, "
 else
-  missing_retypejson=true
-  echo -n "initialize default retype.json"
+  missing_retypecf=true
+  echo -n "initialize default configuration"
   result="$(retype init --verbose 2>&1)" || \
     fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
   echo "::group::Command: retype init --verbose
@@ -127,9 +131,9 @@ echo "::group::Command: ${cmdln[@]}
 ${result}
 ::endgroup::"
 
-if ${missing_retypejson}; then
-  result="$(rm "retype.json" 2>&1)" || \
-    fail_cmd true "unable to remove default retype.json placed into repo root" "rm \"retype.json\"" "${result}"
+if ${missing_retypecf}; then
+  result="$(rm "retype.yml" 2>&1)" || \
+    fail_cmd true "unable to remove default retype.yml placed into repo root" "rm \"retype.yml\"" "${result}"
 fi
 
 echo -n "Documentation built to: ${destdir}"

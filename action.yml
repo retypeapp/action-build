@@ -5,7 +5,7 @@ description: |-
   published to the hosting of choice.
 inputs:
   base:
-    description: Value to override retype.json's "base" config
+    description: Value to override Retype's "base" config
     required: false
   license:
     description: |-
@@ -14,9 +14,10 @@ inputs:
     required: false
   config:
     description: |-
-      Path to the retype.json file. May point to a directory or a .json file.
-      When a directory, retype will look for 'retype.json' in that directory
-      and use it. If it is a .json file, retype will use it as 'retype.json'.
+      Path to the retype.yml file. May point to a directory, a JSON or YAML
+      file. When a directory, retype will look for 'retype.[yml|yaml|json]' in
+      that directory and use it. If it is a file, retype will use it
+      regardless.
 outputs:
   retype-output-path:
     description: |-
