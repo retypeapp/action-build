@@ -82,11 +82,11 @@ if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
   # is supposed to fail (we won't try 'retype init')
   echo -n "${INPUT_CONFIG_PATH}, "
   cmdargs+=("${INPUT_CONFIG_PATH}")
-if [ -e "retype.yml" ]; then
+elif [ -e "retype.yml" ]; then
   echo -n "/retype.yml, "
-elif [ -e retype.yaml ]; then
+elif [ -e "retype.yaml" ]; then
   echo -n "/retype.yaml, "
-elif [ -e retype.json ]; then
+elif [ -e "retype.json" ]; then
   echo -n "/retype.json, "
 else
   missing_retypecf=true
