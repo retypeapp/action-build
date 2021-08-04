@@ -10,12 +10,6 @@ After the action completes, the action will export the `retype-output-path` valu
 
 This action will look for a [`retype.json`](https://retype.com/configuration/project/) file in the repository root.
 
-## Prerequisites
-
-We highly recommend configuring the [actions/setup-dotnet](https://github.com/actions/setup-dotnet) step before `retypeapp/action-build`. This will install the tiny `dotnet` Retype package instead of the larger self-contained NPM package.
-
-Both the `dotnet` and `npm` packages run the exact same version of Retype. The size of the `dotnet` package is much smaller, so the action will setup faster.
-
 ## Usage
 
 ```yaml
@@ -28,6 +22,12 @@ steps:
 
 - uses: retypeapp/action-build
 ```
+
+### Why the `setup-dotnet` step
+
+It is highly recommended -- but not required -- to include the [actions/setup-dotnet](https://github.com/actions/setup-dotnet) step before `retypeapp/action-build`. With this, the Build Action can install the `dotnet tool` Retype package.
+
+If this is not included though, the action will still work, but it may need to use the NPM package in case the installed .NET version is not the one required by Retype. When resorting to the NPM package it may take a bit longer to set up the workflow due to the larger download size.
 
 ## Inputs
 
