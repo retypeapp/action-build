@@ -52,10 +52,23 @@ else
     cmdln=(dotnet tool install --global --version ${retype_version} retypeapp)
     result="$("${cmdln[@]}" 2>&1)" || \
       fail_cmd true "unable to install retype using the dotnet tool" "${cmdln[@]}" "${result}"
-else
-    echo -n "NPM package manager: "
+  else
+    case "${RUNNER_OS}" in
+      "Linux") plat="linux-x64";;
+      "macOS") plat="darwin-x64";;
+      "Windows") plat="win-x64";;
+      *)
+        echo "an unsupported OS."
+        if [ -z "${RUNNER_OS}" ]; then
+          fail "Unable to determine runner's OS to choose which NPM package to download."
+        else
+          fail "Unsupported runner OS: ${RUNNER_OS}"
+        fi
+        ;;
+    esac
+    echo -n "NPM package manager (${plat}): "
 
-    cmdln=(npm install --global "retypeapp@${retype_version}")
+    cmdln=(npm install --global "retypeapp-${plat}@${retype_version}")
     result="$("${cmdln[@]}" 2>&1)" || \
       fail_cmd true "unable to install retype using the NPM package manager" "${cmdln[@]}" "${result}"
   fi
