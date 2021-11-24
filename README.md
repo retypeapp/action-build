@@ -8,7 +8,7 @@ This action runs `retype build` over the files in a repository to build a websit
 
 After the action completes, the action will export the `retype-output-path` value for the next steps to handle the output. The output files can then be pushed back to GitHub, or sent by FTP to another web server, or any other form of website publication target.
 
-This action will look for a [`retype.json`](https://retype.com/configuration/project/) file in the repository root.
+This action will look for a [`retype.yml`](https://retype.com/configuration/project/) file in the repository root.
 
 ## Usage
 
@@ -40,17 +40,17 @@ If this is not included though, the action will still work, but it may need to u
 
 ## Inputs
 
-Configuration of the project should be done in the projects [`retype.json`](https://retype.com/configuration/project) file.
+Configuration of the project should be done in the projects [`retype.yml`](https://retype.com/configuration/project) file.
 
 ### `config`
 
-Specifies the path where `retype.json` file should be located or path to the specific configuration file.
+Specifies the path where `retype.yml` file should be located or path to the specific configuration file.
 
 ### `license`
 
 Specifies the license key to be used with Retype.
 
-**WARNING**: Never save the `license` key value directly to your `retype.yaml` or `retype.json` files. Please use a GitHub Secret to store the value. For information on how to configure a secret, see [Encrypted Secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
+**WARNING**: Never save the `license` key value directly to your `retype.yaml` or `retype.yml` files. Please use a GitHub Secret to store the value. For information on how to configure a secret, see [Encrypted Secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
 ## Examples
 
