@@ -95,9 +95,9 @@ If a `license` key is required, please configure using a GitHub Secret.
 
 For more information on how to set up and use secrets in GitHub actions, see [Encrypted secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
-## Specify path to the retype.json file
+## Specify path to the retype.yml file
 
-It is possible to point the directory where `retype.json` is:
+It is possible to point the directory where `retype.yml` is:
 
 ```yaml
 - uses: retypeapp/action-build
@@ -105,12 +105,12 @@ It is possible to point the directory where `retype.json` is:
     config: my_docs
 ```
 
-Or the full path (relative to the repository root) to retype.json
+Or the full path (relative to the repository root) to retype.yml
 
 ```yaml
 - uses: retypeapp/action-build
   with:
-    config: my_docs/retype.json
+    config: my_docs/retype.yml
 ```
 
 The config file may have a different file name
@@ -135,7 +135,7 @@ In a bit more complex scenario where various repositories are checked out in a w
 
 - uses: retypeapp/action-build
   with:
-    config: own-repository/my_docs/retype.json
+    config: own-repository/my_docs/retype.yml
 ```
 
 ## Passing the output path to another action
