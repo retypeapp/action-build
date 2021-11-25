@@ -106,9 +106,11 @@ else
   echo -n "initialize default configuration"
   result="$(retype init --verbose 2>&1)" || \
     fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
-  echo "::group::Command: retype init --verbose
+  echo ", show command output.
+::group::Command: retype init --verbose
 ${result}
 ::endgroup::"
+  echo -n "Setting up build arguments: resume, "
 fi
 
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
@@ -126,7 +128,7 @@ ${overridestr}
 }"
 cmdargs+=("--override" "${overridestr}")
 
-echo ", done."
+echo "done."
 
 echo -n "Building documentation: "
 
