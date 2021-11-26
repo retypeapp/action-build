@@ -95,22 +95,40 @@ if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
   # is supposed to fail (we won't try 'retype init')
   echo -n "${INPUT_CONFIG_PATH}, "
   cmdargs+=("${INPUT_CONFIG_PATH}")
-elif [ -e "retype.yml" ]; then
-  echo -n "/retype.yml, "
-elif [ -e "retype.yaml" ]; then
-  echo -n "/retype.yaml, "
-elif [ -e "retype.json" ]; then
-  echo -n "/retype.json, "
 else
-  missing_retypecf=true
-  echo -n "initialize default configuration"
-  result="$(retype init --verbose 2>&1)" || \
-    fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
-  echo ", show command output.
+  if [ -e "retype.yml" ]; then
+    echo -n "/retype.yml, "
+  elif [ -e "retype.yaml" ]; then
+    echo -n "/retype.yaml, "
+  elif [ -e "retype.json" ]; then
+    echo -n "/retype.json, "
+  else
+    echo -n "locate, "
+    locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -iname retype.yml -o -iname retype.yaml -o -iname retype.json | cut -b 2-)"
+
+    cf_count="$(echo "${locate_cf}" | wc -l)"
+
+    if [ ${cf_count} -eq 0 ]; then
+      missing_retypecf=true
+      echo -n "initialize default configuration"
+      result="$(retype init --verbose 2>&1)" || \
+        fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
+      echo ", show command output.
+::warning::No Retype configuration file found, using default setting values.
 ::group::Command: retype init --verbose
 ${result}
 ::endgroup::"
-  echo -n "Setting up build arguments: resume, "
+      echo -n "Setting up build arguments: resume, "
+    elif [ ${cf_count} -ne 1 ]; then
+      fail_nl "More than one possible Retype configuration files found. Please remove extra files or specify the desired path with the 'config' argument (https://github.com/retypeapp/action-build#specify-path-to-the-retypeyml-file). See output for the list of paths found.
+
+Configuration files located:
+${locate_cf}"
+    else
+      echo -n "${locate_cf}, "
+      cmdargs+=("${locate_cf:1}")
+    fi
+  fi
 fi
 
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
