@@ -50,11 +50,11 @@ Specifies the path where `retype.yml` file should be located or path to the spec
 
 Specifies the license key to be used with Retype.
 
-**WARNING**: Never save the `license` key value directly to your `retype.yaml` or `retype.yml` files. Please use a GitHub Secret to store the value. For information on how to configure a secret, see [Encrypted Secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
+**NOTICE**: The `license` key value cannot be saved directly to your configuration file. To pass the license key to Retype, the value must be passed as a GitHub Secret. For information on how to store a secret on your repository or organization, see [Encrypted Secrets documentation](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
 ## Examples
 
-The following `retype.yaml` workflow file will serve as our starting template for most of the samples below.
+The following workflow will serve as our starting template for most of the samples below.
 
 ```yaml
 name: GitHub Action for Retype
