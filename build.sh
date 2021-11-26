@@ -137,8 +137,7 @@ if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
 fi
 
 if [ ! -z "${INPUT_LICENSE_KEY}" ]; then
-  overridestr="$(append_json "${overridestr}" "license" "${INPUT_LICENSE_KEY}")" || \
-    fail_nl "Unable to append 'license' setting while building the 'retype build' argument list."
+  cmdargs+=("--secret" "${INPUT_LICENSE_KEY}")
 fi
 
 overridestr="{
