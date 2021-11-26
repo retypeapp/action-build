@@ -132,11 +132,13 @@ ${locate_cf}"
 fi
 
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
+  echo -n "base, "
   overridestr="$(append_json "${overridestr}" "base" "${INPUT_OVERRIDE_BASE}")" || \
     fail_nl "Unable to append 'base' setting while building the 'retype build' argument list."
 fi
 
 if [ ! -z "${INPUT_LICENSE_KEY}" ]; then
+  echo -n "license key, "
   cmdargs+=("--secret" "${INPUT_LICENSE_KEY}")
 fi
 
