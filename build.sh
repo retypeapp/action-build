@@ -104,11 +104,9 @@ else
     echo -n "/retype.json, "
   else
     echo -n "locate, "
-    locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -iname retype.yml -o -iname retype.yaml -o -iname retype.json | cut -b 2-)"
+    locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -not -path "*/.*" -a \( -iname retype.yml -o -iname retype.yaml -o -iname retype.json \) | cut -b 2-)"
 
-    cf_count="$(echo "${locate_cf}" | wc -l)"
-
-    if [ ${cf_count} -eq 0 ]; then
+    if [ -z "${locate_cf}" ]; then
       missing_retypecf=true
       echo -n "initialize default configuration"
       result="$(retype init --verbose 2>&1)" || \
@@ -119,14 +117,19 @@ else
 ${result}
 ::endgroup::"
       echo -n "Setting up build arguments: resume, "
-    elif [ ${cf_count} -ne 1 ]; then
-      fail_nl "More than one possible Retype configuration files found. Please remove extra files or specify the desired path with the 'config' argument (https://github.com/retypeapp/action-build#specify-path-to-the-retypeyml-file). See output for the list of paths found.
+
+    else
+      cf_count="$(echo "${locate_cf}" | wc -l)"
+
+      if [ ${cf_count} -ne 1 ]; then
+       fail_nl "More than one possible Retype configuration files found. Please remove extra files or specify the desired path with the 'config' argument (https://github.com/retypeapp/action-build#specify-path-to-the-retypeyml-file). See output for the list of paths found.
 
 Configuration files located:
 ${locate_cf}"
-    else
-      echo -n "${locate_cf}, "
-      cmdargs+=("${locate_cf:1}")
+      else
+        echo -n "${locate_cf}, "
+        cmdargs+=("${locate_cf:1}")
+      fi
     fi
   fi
 fi
