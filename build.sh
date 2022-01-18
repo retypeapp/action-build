@@ -108,7 +108,7 @@ else
 
     cf_count="$(echo "${locate_cf}" | wc -l)"
 
-    if [ ${cf_count} -eq 0 ]; then
+    if [ -z ${cf_count} ]; then
       missing_retypecf=true
       echo -n "initialize default configuration"
       result="$(retype init --verbose 2>&1)" || \
