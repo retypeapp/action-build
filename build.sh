@@ -104,7 +104,7 @@ else
     echo -n "/retype.json, "
   else
     echo -n "locate, "
-    locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -iname retype.yml -o -iname retype.yaml -o -iname retype.json | cut -b 2-)"
+    locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -not -path ".*" -iname retype.yml -o -iname retype.yaml -o -iname retype.json | cut -b 2-)"
 
     cf_count="$(echo "${locate_cf}" | wc -l)"
 
