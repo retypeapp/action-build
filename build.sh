@@ -22,6 +22,8 @@ if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
   echo "Path to Retype config: ${INPUT_CONFIG_PATH}"
 fi
 
+echo "::warning::Retype v2 is now available. Please see https://retype.com/guides/github-actions/."
+
 echo "Working directory is: $(pwd)"
 
 # We prefer dotnet if available as the package size is (much) smaller.
