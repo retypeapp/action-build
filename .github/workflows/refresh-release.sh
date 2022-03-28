@@ -47,7 +47,7 @@ echo "- Fetching tags..."
 git fetch --tag || fail "Unable to fetch tags from origin."
 
 echo "- Checking tags..."
-overtags=()
+overtags=("latest")
 if git tag | egrep -q "^v${latest_re}\$"; then
  overtags+=("v${latest}")
 fi
