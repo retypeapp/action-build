@@ -47,7 +47,7 @@ echo "- Fetching tags..."
 git fetch --tag || fail "Unable to fetch tags from origin."
 
 echo "- Checking tags..."
-overtags=("latest")
+overtags=()
 if git tag | egrep -q "^v${latest_re}\$"; then
  overtags+=("v${latest}")
 fi
@@ -176,15 +176,13 @@ if ! git status --porcelain | egrep "^ M build\.sh"; then
 
  # there's a %(HEAD) format in git command to show an '*' if the major tag matches current checked out
  # ref, but it seems it does not work, so let's not rely on it
- if ! git tag --format='%(objectname)%(refname:strip=2)' | egrep -q "^${currsha}v${major}\$"; then
-  outdated_tags+=(":v${major}")
- fi
+ existing_tags="$(git tag --format='%(objectname)%(refname:strip=2)')"
 
- if [ ${build} -ne 0 ]; then
-  if ! git tag --format='%(objectname)%(refname:strip=2)' | egrep -q "^${currsha}v${majorminor}\$"; then
-   outdated_tags+=(":v${majorminor}")
+ for tag in latest "v${major}" "v${majminor}"; do
+  if ! echo "${existing_tags}" | egrep -q "^${currsha}${tag//\./\\.}\$"; then
+   outdated_tags+=(":${tag}")
   fi
- fi
+ done
 
  if [ ${#outdated_tags[@]} -gt 0 ]; then
   echo "Removing local and remote copies of outdated tags."
@@ -205,12 +203,12 @@ else
  git commit -m "Updates Retype reference to version ${latest}." || fail "Unable to commit changes to 'build.sh' script."
 
  removetags=()
- if git tag | egrep -q "^v${major}\$"; then
-  removetags=(":v${major}")
- fi
- if [ ${build} -ne 0 ]; then
-  removetags+=(":v${majorminor}")
- fi
+
+ for tag in latest "v${major}" "v${majminor}"; do
+  if git tag | egrep -q "^${tag//\./\\.}\$"; then
+   removetags+=(":${tag}")
+  fi
+ done
 
  echo "Pushing commit."
  git push origin HEAD
@@ -221,11 +219,11 @@ else
    git tag -d "${removetags[@]#:}" || fail "Unable to remove one or more local tags among: ${removetags[@]#:}"
  fi
 
- echo "Creating '${major}', '${majorminor}' and '${latest}' tags."
+ echo "Creating 'latest', 'v${major}', 'v${majorminor}' and 'v${latest}' tags."
  newtags=()
- for tag in ${major} ${majorminor} ${latest}; do
-  git tag v${tag} || fail "Unable to create tag: v${tag}"
-  newtags+=("v${tag}")
+ for tag in latest v${major} v${majorminor} v${latest}; do
+  git tag ${tag} || fail "Unable to create tag: ${tag}"
+  newtags+=("${tag}")
  done
 
  echo "Pushing tags."
@@ -238,7 +236,7 @@ if ${found_rel}; then
  else
   publishmsg="Publishing existing draft"
  fi
- publishmsg+=" release for v${major} tag: ${gh_rel[name]}"
+ publishmsg+=" release for v${major} (latest) tag: ${gh_rel[name]}"
 
  # API endpoint docs
  # https://docs.github.com/en/rest/reference/repos#update-a-release (set "draft" to false)
@@ -279,7 +277,7 @@ else
   --data '{
   "tag_name": "v'"${major}"'",
   "name": "Version '"${major}"'",
-  "body": "Retype Build GitHub Action release version '"${major}"'",
+  "body": "Retype Build GitHub Action release version v'"${major}"'",
   "draft": false,
   "prerelease": false
  }' 2>&1)" || \
