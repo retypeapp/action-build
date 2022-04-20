@@ -161,7 +161,7 @@ fi
 
 echo "Setting git committer info."
 git config user.name "New Release bot"
-git config user.email "hello+retypeapp-action-build@object.net"
+git config user.email "hello+retypeapp-action-build@retype.com"
 
 echo "Updating build.sh."
 sed -Ei "s/^(retype_version=\")[^\"]+(\")\$/\1${latest}\2/" build.sh
