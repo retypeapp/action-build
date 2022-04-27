@@ -64,7 +64,7 @@ if [ ${#ver_suffix} -gt 0 ]; then
  taglist=(next)
 else
  echo " (stable)."
- taglist=(latest "v${major}" "v${majminor}")
+ taglist=(latest "v${major}" "v${majorminor}")
 fi
 
 echo "- Fetching tags..."
