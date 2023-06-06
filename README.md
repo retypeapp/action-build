@@ -16,12 +16,12 @@ This action will look for a [`retype.yml`](https://retype.com/configuration/proj
 steps:
 - uses: actions/checkout@v2
 
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
 ```
 
 ### Optional: `setup-dotnet` step
 
-It may be useful to include the [actions/setup-dotnet](https://github.com/actions/setup-dotnet) step before `retypeapp/action-build@v2`. With this, the Build Action can install the `dotnet tool` Retype package.
+It may be useful to include the [actions/setup-dotnet](https://github.com/actions/setup-dotnet) step before `retypeapp/action-build@latest`. With this, the Build Action can install the `dotnet tool` Retype package.
 
 The workflow file above would then become:
 
@@ -33,7 +33,7 @@ steps:
   with:
     dotnet-version: 6.0.x
 
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
 ```
 
 If this is not included though, the action will still work, but it may need to use the NPM package in case the installed .NET version is not the one required by Retype. When resorting to the NPM package it may take a bit longer to set up the workflow due to the larger download size. It may also be the case that the GitHub runner is an unsupported OS by the NPM packages; as long as it has .NET installed, Retype should work regardless of the OS. But the NPM package is built targetted to specific OS'es, namely Linux, Mac and Windows.
@@ -73,7 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: retypeapp/action-build@v2
+      - uses: retypeapp/action-build@latest
 ```
 
 Here are a few common workflow scenarios.
@@ -82,7 +82,7 @@ Here are a few common workflow scenarios.
 
 ```yaml
 steps:
-  - uses: retypeapp/action-build@v2
+  - uses: retypeapp/action-build@latest
 ```
 
 ## Specify a Retype license key
@@ -90,7 +90,7 @@ steps:
 If a `license` key is required, please configure using a GitHub Secret.
 
 ```yaml
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
   with:
     license: ${{ secrets.RETYPE_LICENSE_KEY }}
 ```
@@ -102,7 +102,7 @@ For more information on how to set up and use secrets in GitHub actions, see [En
 It is possible to point the directory where `retype.yml` is:
 
 ```yaml
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
   with:
     config: my_docs
 ```
@@ -110,7 +110,7 @@ It is possible to point the directory where `retype.yml` is:
 Or the full path (relative to the repository root) to retype.yml
 
 ```yaml
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
   with:
     config: my_docs/retype.yml
 ```
@@ -118,7 +118,7 @@ Or the full path (relative to the repository root) to retype.yml
 The config file may have a different file name
 
 ```yaml
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
   with:
     config: my_docs/retype-staging.json
 ```
@@ -135,7 +135,7 @@ In a bit more complex scenario where various repositories are checked out in a w
     repository: organization/repository-name
     path: auxiliary-repository
 
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
   with:
     config: own-repository/my_docs/retype.yml
 ```
@@ -145,7 +145,7 @@ In a bit more complex scenario where various repositories are checked out in a w
 It is possible to get the output path of this step to use in other steps or actions after the `action-build` is complete by using the `retype-output-path` value.
 
 ```yaml
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
   id: build1
 
 - shell: bash
@@ -165,7 +165,7 @@ The following sample demonstrates the [`upload-artifact`](https://github.com/act
 To use the Retype output in another job within the same workflow, or let an external source download it, it is possible to use [`actions/upload-artifact`](https://github.com/actions/upload-artifact) to persist the files. The uploaded artifact can then be retrieved in another job or workflow using [`actions/download-artifact`](https://github.com/actions/download-artifact)
 
 ```yaml
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
   id: build1
 
 - uses: actions/upload-artifact@v2
@@ -180,7 +180,7 @@ By using the Retype [retypeapp/action-github-pages](https://github.com/retypeapp
 The following sample demonstrates configuring the Retype `action-github-pages` action to publish to GitHub Pages:
 
 ```yaml
-- uses: retypeapp/action-build@v2
+- uses: retypeapp/action-build@latest
 
 - uses: retypeapp/action-github-pages@v2
   with:
