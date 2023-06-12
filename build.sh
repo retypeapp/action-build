@@ -179,7 +179,13 @@ if [ "${config_output}" != "${destdir}" ]; then
 fi
 echo "" # break line after the message above is done being composed.
 
-echo "::set-output name=retype-output-PATH::${destdir}"
+# This makes the output path available via the
+# 'steps.stepId.outputs.retype-output-path' reference, unique for the step.
+echo "retype-output-path=${destdir}" >> "${GITHUB_OUTPUT}"
+
+# This makes the output path available via the $RETYPE_OUTPUT_PATH that doesn't
+# require referencing but is reset by the last ran build step if more than one
+# are assigned to a job.
 echo "RETYPE_OUTPUT_PATH=${destdir}" >> "${GITHUB_ENV}"
 
 # perform a quick clean-up to remove temporary, untracked files

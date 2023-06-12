@@ -6,7 +6,7 @@ A GitHub Action to build a [Retype](https://retype.com/) powered website. The ou
 
 This action runs `retype build` over the files in a repository to build a website in the form of a static html website that can be published to any website hosting solution available.
 
-After the action completes, the action will export the `retype-output-path` value for the next steps to handle the output. The output files can then be pushed back to GitHub, or sent by FTP to another web server, or any other form of website publication target.
+After the action completes, it will export the `retype-output-path` value for the next steps to handle the output. The output files can then be pushed back to GitHub, or sent by FTP to another web server, or any other form of website publication target.
 
 This action will look for a [`retype.yml`](https://retype.com/configuration/project/) file in the repository root.
 
