@@ -28,7 +28,7 @@ echo "Working directory is: $(pwd)"
 if which dotnet > /dev/null 2>&1 && [ "$(dotnet --version | cut -f1 -d.)" -ge 5 ]; then
   use_dotnet=true
 elif ! which node > /dev/null 2>&1 || [ "$(node --version | cut -f1 -d. | cut -b2-)" -lt 14 ]; then
-  fail "Can't find suitable dotnet or node installation to install retype package with."
+  fail "Cannot find a suitable dotnet or node installation to install the retype package with."
 fi
 
 retype_path="$(which retype 2> /dev/null)"
