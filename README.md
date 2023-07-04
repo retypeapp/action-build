@@ -182,8 +182,16 @@ The following sample demonstrates configuring the Retype `action-github-pages` a
 ```yaml
 - uses: retypeapp/action-build@latest
 
-- uses: retypeapp/action-github-pages@v2
+- uses: retypeapp/action-github-pages@latest
   with:
     branch: retype
     update-branch: true
+```
+
+## Testing with a specific branch of the retypepp action
+
+You can test with a specific branch of the retypapp action by replacing the `@latest` with the `@branch-name-here`.
+
+```yaml
+- uses: retypeapp/action-build@branch-name-here
 ```
