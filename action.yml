@@ -34,4 +34,5 @@ runs:
         INPUT_OVERRIDE_TITLE: ${{ inputs.title }}
         INPUT_OVERRIDE_BASE: ${{ inputs.base }}
         INPUT_LICENSE_KEY: ${{ inputs.license }}
+        INPUT_STRICT: ${{ inputs.strict }}
         INPUT_CONFIG_PATH: ${{ inputs.config }}

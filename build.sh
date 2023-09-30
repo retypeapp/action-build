@@ -140,6 +140,11 @@ if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
     fail_nl "Unable to append 'base' setting while building the 'retype build' argument list."
 fi
 
+if [ "${INPUT_STRICT}" == "true" ]; then
+  echo -n "strict mode, "
+  cmdargs+=("--strict")
+fi
+
 if [ ! -z "${INPUT_LICENSE_KEY}" ]; then
   echo -n "license key, "
   cmdargs+=("--secret" "${INPUT_LICENSE_KEY}")
