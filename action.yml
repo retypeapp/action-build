@@ -15,9 +15,15 @@ inputs:
   config:
     description: |-
       Path to the retype.yml file. May point to a directory, a JSON or YAML
-      file. When a directory, retype will look for 'retype.[yml|yaml|json]' in
-      that directory and use it. If it is a file, retype will use it
+      file. When a directory, Retype will look for 'retype.[yml|yaml|json]' in
+      that directory and use it. If it is a file, Retype will use it
       regardless.
+  strict:
+    description: |-
+      Allows the build to return a non-zero exit code if it encounters any
+      errors or warnings. This can be particularly helpful for developers when
+      they need to validate the stability of their builds. Default is false.
+    required: false
 outputs:
   retype-output-path:
     description: |-
