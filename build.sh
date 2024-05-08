@@ -1,7 +1,7 @@
 #!/bin/bash
 
+# Variables
 retype_version="3.5.0"
-
 use_dotnet=false
 _ifs="${IFS}"
 
@@ -10,7 +10,7 @@ if [ ! -e "${GITHUB_ACTION_PATH}/functions.inc.sh" ]; then
   exit 1
 fi
 
-source "${GITHUB_ACTION_PATH}"/functions.inc.sh || {
+source "${GITHUB_ACTION_PATH}/functions.inc.sh" || {
   echo "::error file=${BASH_SOURCE},line=${LINENO}::Error including functions.inc.sh."
   exit 1
 }
@@ -42,7 +42,7 @@ if [ ${retstat} -eq 0 ]; then
 Expected version: ${retype_version}
 Available version: $(retype --version | strings)
 
-${abortbuildmsg}"
+Action aborted due to mismatched Retype version."
   fi
 else
   echo -n "Installing Retype v${retype_version} using "
@@ -94,7 +94,7 @@ workflowdir="${WORKFLOW_RETYPE_DIR}"
 echo "Confirming temporary workflow directory: ${workflowdir}"
 
 subdir=""
-if [ ! -n "${INPUT_SUBDIR}" ]; then
+if [ -n "${INPUT_SUBDIR}" ]; then
   # Remove leading slash, if present
   subdir="${INPUT_SUBDIR##/}"
   echo "Output subdirectory: ${subdir}"
@@ -124,66 +124,35 @@ config_output="$(cf_path "${destdir}")" || fail_nl "unable to parse output path:
 overridestr="$(append_json "" "output" "${config_output}")" || \
   fail_nl "Unable to append output path setting while building the 'retype build' argument list."
 
-missing_retypecf=false
-if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
-  # In case path is a directory and there's no Retype conf file, the process
-  # is supposed to fail (we won't try 'retype init')
-  echo -n "${INPUT_CONFIG_PATH}, "
-  cmdargs+=("${INPUT_CONFIG_PATH}")
+# Initialize an empty variable to store the config file path
+config_file_path=""
+
+# Use the provided path if available
+if [ -n "${INPUT_CONFIG_PATH}" ] && [ -e "${INPUT_CONFIG_PATH}" ]; then
+  config_file_path="${INPUT_CONFIG_PATH}"
+  echo "Using provided configuration file: ${config_file_path}"
+
+# Check for known configuration file names sequentially
+elif [ -e "retype.yml" ]; then
+  config_file_path="retype.yml"
+  echo "Found retype.yml"
+
+elif [ -e "retype.yaml" ]; then
+  config_file_path="retype.yaml"
+  echo "Found retype.yaml"
+
+elif [ -e "retype.json" ]; then
+  config_file_path="retype.json"
+  echo "Found retype.json"
+
 else
-  if [ -e "retype.yml" ]; then
-    echo -n "/retype.yml, "
-  elif [ -e "retype.yaml" ]; then
-    echo -n "/retype.yaml, "
-  elif [ -e "retype.json" ]; then
-    echo -n "/retype.json, "
-  else
-    echo -n "locate, "
-    locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -not -path "*/.*" -a \( -iname retype.yml -o -iname retype.yaml -o -iname retype.json \) | cut -b 2-)"
-
-    if [ -z "${locate_cf}" ]; then
-      missing_retypecf=true
-      echo -n "initialize default configuration"
-
-      # Initialize the command array
-      cmdln=(retype init)
-
-      # Add `--verbose` if `INPUT_VERBOSE` is set to "true"
-      if [ "${INPUT_VERBOSE}" == "true" ]; then
-        cmdln+=("--verbose")
-      fi
-
-      # Execute the command
-      result="$("${cmdln[@]}" 2>&1)" || \
-        fail_cmd comma "'retype init' command failed" "${cmdln[*]}" "${result}"
-
-      echo ", show command output.
-::warning::No Retype configuration file found, using default setting values.
-::group::Command: retype init --verbose
-${result}
-::endgroup::"
-      echo -n "Setting up build arguments: resume, "
-
-    else
-      cf_count="$(echo "${locate_cf}" | wc -l)"
-
-      if [ ${cf_count} -ne 1 ]; then
-       fail_nl "More than one possible Retype configuration files found. Please remove extra files or specify the desired path with the 'config' argument (https://github.com/retypeapp/action-build#specify-path-to-the-retypeyml-file). See output for the list of paths found.
-
-Configuration files located:
-${locate_cf}"
-      else
-        echo -n "${locate_cf}, "
-        cmdargs+=("${locate_cf:1}")
-      fi
-    fi
-  fi
+  # No valid configuration file was found
+  echo "::warning file=${BASH_SOURCE},line=${LINENO}::No Retype configuration file found. Please provide a valid file or path."
 fi
 
-if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
-  echo -n "base, "
-  overridestr="$(append_json "${overridestr}" "base" "${INPUT_OVERRIDE_BASE}")" || \
-    fail_nl "Unable to append 'base' setting while building the 'retype build' argument list."
+# Ensure the path variable is passed to subsequent commands if a file was found
+if [ -n "${config_file_path}" ]; then
+  cmdargs+=("${config_file_path}")
 fi
 
 if [ "${INPUT_STRICT}" == "true" ]; then
@@ -224,9 +193,9 @@ if ${missing_retypecf}; then
     fail_cmd true "unable to remove default retype.yml placed into repo root" "rm \"retype.yml\"" "${result}"
 fi
 
-echo -n "Output sent to: ${destdir}"
+echo "Output sent to: ${destdir}"
 if [ "${config_output}" != "${destdir}" ]; then
-  echo -n " (${config_output})"
+  echo " (${config_output})"
 fi
 echo "" # break line after the message above is done being composed.
 
@@ -240,10 +209,10 @@ echo "retype-output-path=${workflowdir}" >> "${GITHUB_OUTPUT}"
 echo "RETYPE_OUTPUT_PATH=${workflowdir}" >> "${GITHUB_ENV}"
 
 # perform a quick clean-up to remove temporary, untracked files
-echo -n "Cleaning up repository: git-reset"
+echo -n "Cleaning up repository..."
 
 result="$(git reset HEAD -- . 2>&1)" || \
-  fail_cmd comma "unable to git-reset repository back to HEAD after Retype build." "git checkout -- ." "${result}"
+  fail_cmd comma "unable to git-reset repository back to HEAD after Retype build." "git reset HEAD -- ." "${result}"
 
 echo -n ", git-checkout"
 result="$(git checkout -- . 2>&1)" || \
@@ -253,5 +222,5 @@ echo -n ", git-clean"
 result="$(git clean -d -x -q -f 2>&1)" || \
   fail_cmd comma "unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
 
-echo ", done.
-Retype documentation build completed successfully."
+echo " done.
+Retype build completed successfully."
