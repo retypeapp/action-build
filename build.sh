@@ -66,13 +66,13 @@ else
         fi
         ;;
     esac
-    echo -n "NPM package manager (${plat}): "
+    echo -n "NPM package manager (${plat})... "
 
     cmdln=(npm install --global "retypeapp-${plat}@${retype_version}")
     result="$("${cmdln[@]}" 2>&1)" || \
       fail_cmd true "unable to install retype using the NPM package manager" "${cmdln[@]}" "${result}"
   fi
-  echo "done."
+  echo "SUCCESS"
 fi
 
 # Check if the shared environment variable already exists for this workflow
@@ -124,35 +124,61 @@ config_output="$(cf_path "${destdir}")" || fail_nl "unable to parse output path:
 overridestr="$(append_json "" "output" "${config_output}")" || \
   fail_nl "Unable to append output path setting while building the 'retype build' argument list."
 
-# Initialize an empty variable to store the config file path
-config_file_path=""
+missing_retypecf=false
 
-# Use the provided path if available
-if [ -n "${INPUT_CONFIG_PATH}" ] && [ -e "${INPUT_CONFIG_PATH}" ]; then
-  config_file_path="${INPUT_CONFIG_PATH}"
-  echo "Using provided configuration file: ${config_file_path}"
-
-# Check for known configuration file names sequentially
-elif [ -e "retype.yml" ]; then
-  config_file_path="retype.yml"
-  echo "Found retype.yml"
-
-elif [ -e "retype.yaml" ]; then
-  config_file_path="retype.yaml"
-  echo "Found retype.yaml"
-
-elif [ -e "retype.json" ]; then
-  config_file_path="retype.json"
-  echo "Found retype.json"
-
+if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
+  # In case path is a directory and there's no Retype conf file, the process
+  # is supposed to fail (we won't try 'retype init')
+  echo -n "${INPUT_CONFIG_PATH}, "
+  cmdargs+=("${INPUT_CONFIG_PATH}")
 else
-  # No valid configuration file was found
-  echo "::warning file=${BASH_SOURCE},line=${LINENO}::No Retype configuration file found. Please provide a valid file or path."
-fi
+  if [ -e "retype.yml" ]; then
+    echo -n "/retype.yml, "
+  elif [ -e "retype.yaml" ]; then
+    echo -n "/retype.yaml, "
+  elif [ -e "retype.json" ]; then
+    echo -n "/retype.json, "
+  else
+    echo -n "locate, "
+    locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -not -path "*/.*" -a \( -iname retype.yml -o -iname retype.yaml -o -iname retype.json \) | cut -b 2-)"
 
-# Ensure the path variable is passed to subsequent commands if a file was found
-if [ -n "${config_file_path}" ]; then
-  cmdargs+=("${config_file_path}")
+    if [ -z "${locate_cf}" ]; then
+      missing_retypecf=true
+      echo -n "initialize default configuration"
+
+      # Initialize the command array
+      cmdln=(retype init)
+
+      # Add `--verbose` if `INPUT_VERBOSE` is set to "true"
+      if [ "${INPUT_VERBOSE}" == "true" ]; then
+        cmdln+=("--verbose")
+      fi
+
+      # Execute the command
+      result="$("${cmdln[@]}" 2>&1)" || \
+        fail_cmd comma "'retype init' command failed" "${cmdln[*]}" "${result}"
+
+      echo ", show command output.
+::warning::No Retype configuration file found, using default setting values.
+::group::Command: retype init --verbose
+${result}
+::endgroup::"
+      echo -n "Setting up build arguments: resume, "
+
+    else
+      cf_count="$(echo "${locate_cf}" | wc -l)"
+
+      if [ ${cf_count} -ne 1 ]; then
+       fail_nl "More than one possible Retype configuration file was found. Please remove the extra file(s) or specify the desired path with the 'config' argument (https://github.com/retypeapp/action-build#specify-path-to-the-retypeyml-file). See output for the list of paths found.
+
+Configuration files located:
+${locate_cf}"
+      else
+        echo -n "${locate_cf}, "
+        cmdargs+=("${locate_cf:1}")
+      fi
+    fi
+  fi
 fi
 
 if [ "${INPUT_STRICT}" == "true" ]; then
@@ -172,7 +198,7 @@ cmdargs+=("--override" "${overridestr}")
 
 echo "done."
 
-echo -n "Building documentation: "
+echo -n "Building documentation... "
 
 cmdln=(retype build "${cmdargs[@]}")
 result="$("${cmdln[@]}" 2>&1)" || \
@@ -182,7 +208,7 @@ if [ ! -e "${destdir}/resources/js/config.js" ]; then
   fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output."
 fi
 
-echo "done."
+echo "SUCCESS"
 
 echo "::group::Command: ${cmdln[@]}
 ${result}
@@ -216,11 +242,11 @@ result="$(git reset HEAD -- . 2>&1)" || \
 
 echo -n ", git-checkout"
 result="$(git checkout -- . 2>&1)" || \
-  fail_cmd comma "unable to git-checkout repository afresh after Retype build." "git checkout -- ." "${result}"
+  fail_cmd comma "unable to git-checkout repository after Retype build." "git checkout -- ." "${result}"
 
 echo -n ", git-clean"
 result="$(git clean -d -x -q -f 2>&1)" || \
   fail_cmd comma "unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
 
-echo " done.
-Retype build completed successfully."
+echo " SUCCESS"
+echo "Retype build completed successfully."
