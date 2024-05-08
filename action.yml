@@ -1,12 +1,9 @@
 name: Retype Build Action
 author: Object.NET, Inc.
 description: |-
-  Builds documentation using Retype. The built output from this step can be
+  Builds documentation using Retype. The output from this step can be
   published to the hosting of choice.
 inputs:
-  base:
-    description: Value to override Retype's "base" config
-    required: false
   license:
     description: |-
       License key to use with Retype. The Retype license key is private.
@@ -24,6 +21,14 @@ inputs:
       errors or warnings. This can be particularly helpful for developers when
       they need to validate the stability of their builds. Default is false.
     required: false
+  verbose:
+    description: |-
+      Enable verbose logging during build process. Default is false.
+    required: false
+  subdir:
+    description: Specifies the subdirectory within the default base directory
+      where the generated files will be output. Default is "" (empty).
+    required: false
 outputs:
   retype-output-path:
     description: |-
@@ -37,8 +42,8 @@ runs:
       run: "${GITHUB_ACTION_PATH}/build.sh"
       shell: bash
       env:
-        INPUT_OVERRIDE_TITLE: ${{ inputs.title }}
-        INPUT_OVERRIDE_BASE: ${{ inputs.base }}
         INPUT_LICENSE_KEY: ${{ inputs.license }}
         INPUT_STRICT: ${{ inputs.strict }}
         INPUT_CONFIG_PATH: ${{ inputs.config }}
+        INPUT_VERBOSE: ${{ inputs.verbose }}
+        INPUT_SUBDIR: ${{ inputs.subdir }}

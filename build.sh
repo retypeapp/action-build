@@ -75,17 +75,52 @@ else
   echo "done."
 fi
 
-echo -n "Determining temporary target folder to place parsed documentation: "
-# by letting it create the directory we can guarantee no other call of mktemp could reference
-# the same path.
-destdir="$(mktemp -d)"
-echo "${destdir}"
+# Check if the shared environment variable already exists for this workflow
+if [ -z "${WORKFLOW_RETYPE_DIR}" ]; then
+    echo -n "Temporary workflow directory: "
+    # by letting it create the directory we can guarantee no other call to mktemp could reference
+    # the same path.
+    export WORKFLOW_RETYPE_DIR="$(mktemp -d)"
+    echo "${WORKFLOW_RETYPE_DIR}"
+
+    # Save the directory to a shared GitHub environment variable so other steps can reuse it
+    echo "WORKFLOW_RETYPE_DIR=${WORKFLOW_RETYPE_DIR}" >> "${GITHUB_ENV}"
+else
+    echo -n "Reusing existing temporary workflow directory: "
+    echo "${WORKFLOW_RETYPE_DIR}"
+fi
+
+workflowdir="${WORKFLOW_RETYPE_DIR}"
+echo "Confirming temporary workflow directory: ${workflowdir}"
+
+subdir=""
+if [ ! -n "${INPUT_SUBDIR}" ]; then
+  # Remove leading slash, if present
+  subdir="${INPUT_SUBDIR##/}"
+  echo "Output subdirectory: ${subdir}"
+fi
+
+# Construct the full destination directory path
+if [ -n "${subdir}" ]; then
+  destdir="${workflowdir}/${subdir}"
+  # Create the full directory path with subdirectories
+  mkdir -p "${destdir}"
+else
+  destdir="${workflowdir}"
+fi
+
+echo "Confirming temporary target folder: ${destdir}"
 
 echo -n "Setting up build arguments: "
 
+if [ "${INPUT_VERBOSE}" == "true" ]; then
+  echo -n "Enable verbose logging during build process"
+  cmdargs=(--verbose)
+fi
+
 # cf_path ensures path is converted in case we are running from windows
 config_output="$(cf_path "${destdir}")" || fail_nl "unable to parse output path: ${destdir}"
-cmdargs=(--verbose)
+
 overridestr="$(append_json "" "output" "${config_output}")" || \
   fail_nl "Unable to append output path setting while building the 'retype build' argument list."
 
@@ -178,7 +213,7 @@ if ${missing_retypecf}; then
     fail_cmd true "unable to remove default retype.yml placed into repo root" "rm \"retype.yml\"" "${result}"
 fi
 
-echo -n "Documentation built to: ${destdir}"
+echo -n "Output sent to: ${destdir}"
 if [ "${config_output}" != "${destdir}" ]; then
   echo -n " (${config_output})"
 fi
@@ -186,12 +221,12 @@ echo "" # break line after the message above is done being composed.
 
 # This makes the output path available via the
 # 'steps.stepId.outputs.retype-output-path' reference, unique for the step.
-echo "retype-output-path=${destdir}" >> "${GITHUB_OUTPUT}"
+echo "retype-output-path=${workflowdir}" >> "${GITHUB_OUTPUT}"
 
 # This makes the output path available via the $RETYPE_OUTPUT_PATH that doesn't
 # require referencing but is reset by the last ran build step if more than one
 # are assigned to a job.
-echo "RETYPE_OUTPUT_PATH=${destdir}" >> "${GITHUB_ENV}"
+echo "RETYPE_OUTPUT_PATH=${workflowdir}" >> "${GITHUB_ENV}"
 
 # perform a quick clean-up to remove temporary, untracked files
 echo -n "Cleaning up repository: git-reset"
