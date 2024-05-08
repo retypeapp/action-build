@@ -144,8 +144,19 @@ else
     if [ -z "${locate_cf}" ]; then
       missing_retypecf=true
       echo -n "initialize default configuration"
-      result="$(retype init --verbose 2>&1)" || \
-        fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
+
+      # Initialize the command array
+      cmdln=(retype init)
+
+      # Add `--verbose` if `INPUT_VERBOSE` is set to "true"
+      if [ "${INPUT_VERBOSE}" == "true" ]; then
+        cmdln+=("--verbose")
+      fi
+
+      # Execute the command
+      result="$("${cmdln[@]}" 2>&1)" || \
+        fail_cmd comma "'retype init' command failed" "${cmdln[*]}" "${result}"
+
       echo ", show command output.
 ::warning::No Retype configuration file found, using default setting values.
 ::group::Command: retype init --verbose
