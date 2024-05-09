@@ -72,7 +72,6 @@ else
     result="$("${cmdln[@]}" 2>&1)" || \
       fail_cmd true "unable to install retype using the NPM package manager" "${cmdln[@]}" "${result}"
   fi
-  echo "SUCCESS"
 fi
 
 # Check if the shared environment variable already exists for this workflow
@@ -194,7 +193,7 @@ ${overridestr}
 }"
 cmdargs+=("--override" "${overridestr}")
 
-echo -n "Building documentation... "
+echo "Building documentation... "
 
 cmdln=(retype build "${cmdargs[@]}")
 result="$("${cmdln[@]}" 2>&1)" || \
@@ -216,8 +215,6 @@ fi
 if [ "${config_output}" != "${destdir}" ]; then
   echo " (${config_output})"
 fi
-
-echo "" # break line after the message above is done being composed.
 
 # This makes the output path available via the
 # 'steps.stepId.outputs.retype-output-path' reference, unique for the step.
@@ -242,4 +239,5 @@ echo -n " git-clean"
 result="$(git clean -d -x -q -f 2>&1)" || \
   fail_cmd comma "unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
 
+echo ""
 echo "Retype build completed successfully."
