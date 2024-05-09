@@ -159,7 +159,7 @@ else
 
       echo ", show command output.
 ::warning::No Retype configuration file found, using default setting values.
-::group::See command...
+::group::See result...
 retype init --verbose
 ${result}
 ::endgroup::"
@@ -207,7 +207,7 @@ if [ ! -e "${destdir}/resources/js/config.js" ]; then
   fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output."
 fi
 
-echo "::group::See command...
+echo "::group::See result...
 ${cmdln[@]}
 
 ${result}
