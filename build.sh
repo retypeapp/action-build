@@ -47,7 +47,7 @@ Action aborted due to mismatched Retype version."
 else
   echo -n "Installing Retype v${retype_version} using "
   if ${use_dotnet}; then
-    echo -n "dotnet tool: "
+    echo -n "dotnet tool"
 
     cmdln=(dotnet tool install --global --version ${retype_version} retypeapp)
     result="$("${cmdln[@]}" 2>&1)" || \
@@ -66,7 +66,7 @@ else
         fi
         ;;
     esac
-    echo -n "NPM package manager (${plat})... "
+    echo -n "NPM package manager (${plat})"
 
     cmdln=(npm install --global "retypeapp-${plat}@${retype_version}")
     result="$("${cmdln[@]}" 2>&1)" || \
@@ -77,11 +77,9 @@ fi
 
 # Check if the shared environment variable already exists for this workflow
 if [ -z "${WORKFLOW_RETYPE_DIR}" ]; then
-    echo -n "Temporary workflow directory: "
     # by letting it create the directory we can guarantee no other call to mktemp could reference
     # the same path.
     export WORKFLOW_RETYPE_DIR="$(mktemp -d)"
-    echo "${WORKFLOW_RETYPE_DIR}"
 
     # Save the directory to a shared GitHub environment variable so other steps can reuse it
     echo "WORKFLOW_RETYPE_DIR=${WORKFLOW_RETYPE_DIR}" >> "${GITHUB_ENV}"
@@ -91,7 +89,7 @@ else
 fi
 
 workflowdir="${WORKFLOW_RETYPE_DIR}"
-echo "Confirming temporary workflow directory: ${workflowdir}"
+echo "Workflow directory: ${workflowdir}"
 
 subdir=""
 if [ -n "${INPUT_SUBDIR}" ]; then
@@ -109,7 +107,7 @@ else
   destdir="${workflowdir}"
 fi
 
-echo "Confirming temporary target folder: ${destdir}"
+echo "Target subdirectory: ${destdir}"
 
 echo -n "Setting up build arguments: "
 
@@ -196,8 +194,6 @@ ${overridestr}
 }"
 cmdargs+=("--override" "${overridestr}")
 
-echo "done."
-
 echo -n "Building documentation... "
 
 cmdln=(retype build "${cmdargs[@]}")
@@ -208,8 +204,6 @@ if [ ! -e "${destdir}/resources/js/config.js" ]; then
   fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output."
 fi
 
-echo "SUCCESS"
-
 echo "::group::Command: ${cmdln[@]}
 ${result}
 ::endgroup::"
@@ -219,10 +213,10 @@ if ${missing_retypecf}; then
     fail_cmd true "unable to remove default retype.yml placed into repo root" "rm \"retype.yml\"" "${result}"
 fi
 
-echo "Output sent to: ${destdir}"
 if [ "${config_output}" != "${destdir}" ]; then
   echo " (${config_output})"
 fi
+
 echo "" # break line after the message above is done being composed.
 
 # This makes the output path available via the
@@ -235,18 +229,17 @@ echo "retype-output-path=${workflowdir}" >> "${GITHUB_OUTPUT}"
 echo "RETYPE_OUTPUT_PATH=${workflowdir}" >> "${GITHUB_ENV}"
 
 # perform a quick clean-up to remove temporary, untracked files
-echo -n "Cleaning up repository..."
+echo -n "Cleaning up repository with"
 
 result="$(git reset HEAD -- . 2>&1)" || \
   fail_cmd comma "unable to git-reset repository back to HEAD after Retype build." "git reset HEAD -- ." "${result}"
 
-echo -n ", git-checkout"
+echo -n " git-checkout"
 result="$(git checkout -- . 2>&1)" || \
   fail_cmd comma "unable to git-checkout repository after Retype build." "git checkout -- ." "${result}"
 
-echo -n ", git-clean"
+echo -n " git-clean"
 result="$(git clean -d -x -q -f 2>&1)" || \
   fail_cmd comma "unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
 
-echo " SUCCESS"
 echo "Retype build completed successfully."
