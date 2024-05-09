@@ -87,6 +87,8 @@ else
     echo "${WORKFLOW_RETYPE_DIR}"
 fi
 
+echo ""
+
 workflowdir="${WORKFLOW_RETYPE_DIR}"
 echo "Workflow directory: ${workflowdir}"
 
@@ -94,7 +96,7 @@ subdir=""
 if [ -n "${INPUT_SUBDIR}" ]; then
   # Remove leading slash, if present
   subdir="${INPUT_SUBDIR##/}"
-  echo "Output subdirectory: ${subdir}"
+  echo "Output subdirectory: ${subdir}"``
 fi
 
 # Construct the full destination directory path
@@ -193,6 +195,7 @@ ${overridestr}
 }"
 cmdargs+=("--override" "${overridestr}")
 
+echo ""
 echo "Building documentation... "
 
 cmdln=(retype build "${cmdargs[@]}")
@@ -240,4 +243,4 @@ result="$(git clean -d -x -q -f 2>&1)" || \
   fail_cmd comma "unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
 
 echo ""
-echo "Retype build completed successfully."
+echo "Retype build completed successfully"
