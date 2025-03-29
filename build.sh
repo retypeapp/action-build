@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Variables
 retype_version="3.6.0"
 
 use_dotnet=false
@@ -10,7 +11,7 @@ if [ ! -e "${GITHUB_ACTION_PATH}/functions.inc.sh" ]; then
   exit 1
 fi
 
-source "${GITHUB_ACTION_PATH}"/functions.inc.sh || {
+source "${GITHUB_ACTION_PATH}/functions.inc.sh" || {
   echo "::error file=${BASH_SOURCE},line=${LINENO}::Error including functions.inc.sh."
   exit 1
 }
@@ -42,12 +43,12 @@ if [ ${retstat} -eq 0 ]; then
 Expected version: ${retype_version}
 Available version: $(retype --version | strings)
 
-${abortbuildmsg}"
+Action aborted due to mismatched Retype version."
   fi
 else
   echo -n "Installing Retype v${retype_version} using "
   if ${use_dotnet}; then
-    echo -n "dotnet tool: "
+    echo -n "dotnet tool"
 
     cmdln=(dotnet tool install --global --version ${retype_version} retypeapp)
     result="$("${cmdln[@]}" 2>&1)" || \
@@ -66,30 +67,65 @@ else
         fi
         ;;
     esac
-    echo -n "NPM package manager (${plat}): "
+    echo -n "NPM package manager (${plat})"
 
     cmdln=(npm install --global "retypeapp-${plat}@${retype_version}")
     result="$("${cmdln[@]}" 2>&1)" || \
       fail_cmd true "unable to install retype using the NPM package manager" "${cmdln[@]}" "${result}"
   fi
-  echo "done."
 fi
 
-echo -n "Determining temporary target folder to place parsed documentation: "
-# by letting it create the directory we can guarantee no other call of mktemp could reference
-# the same path.
-destdir="$(mktemp -d)"
-echo "${destdir}"
+# Check if the shared environment variable already exists for this workflow
+if [ -z "${WORKFLOW_RETYPE_DIR}" ]; then
+    # by letting it create the directory we can guarantee no other call to mktemp could reference
+    # the same path.
+    export WORKFLOW_RETYPE_DIR="$(mktemp -d)"
+
+    # Save the directory to a shared GitHub environment variable so other steps can reuse it
+    echo "WORKFLOW_RETYPE_DIR=${WORKFLOW_RETYPE_DIR}" >> "${GITHUB_ENV}"
+else
+    echo -n "Reusing existing temporary workflow directory: "
+    echo "${WORKFLOW_RETYPE_DIR}"
+fi
+
+echo ""
+
+workflowdir="${WORKFLOW_RETYPE_DIR}"
+echo "Workflow directory: ${workflowdir}"
+
+subdir=""
+if [ -n "${INPUT_SUBDIR}" ]; then
+  # Remove leading slash, if present
+  subdir="${INPUT_SUBDIR##/}"
+  echo "Output subdirectory: ${subdir}"``
+fi
+
+# Construct the full destination directory path
+if [ -n "${subdir}" ]; then
+  destdir="${workflowdir}/${subdir}"
+  # Create the full directory path with subdirectories
+  mkdir -p "${destdir}"
+else
+  destdir="${workflowdir}"
+fi
+
+echo "Target subdirectory: ${destdir}"
 
 echo -n "Setting up build arguments: "
 
+if [ "${INPUT_VERBOSE}" == "true" ]; then
+  echo -n "Enable verbose logging during build process"
+  cmdargs=(--verbose)
+fi
+
 # cf_path ensures path is converted in case we are running from windows
 config_output="$(cf_path "${destdir}")" || fail_nl "unable to parse output path: ${destdir}"
-cmdargs=(--verbose)
+
 overridestr="$(append_json "" "output" "${config_output}")" || \
   fail_nl "Unable to append output path setting while building the 'retype build' argument list."
 
 missing_retypecf=false
+
 if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
   # In case path is a directory and there's no Retype conf file, the process
   # is supposed to fail (we won't try 'retype init')
@@ -109,11 +145,23 @@ else
     if [ -z "${locate_cf}" ]; then
       missing_retypecf=true
       echo -n "initialize default configuration"
-      result="$(retype init --verbose 2>&1)" || \
-        fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
+
+      # Initialize the command array
+      cmdln=(retype init)
+
+      # Add `--verbose` if `INPUT_VERBOSE` is set to "true"
+      if [ "${INPUT_VERBOSE}" == "true" ]; then
+        cmdln+=("--verbose")
+      fi
+
+      # Execute the command
+      result="$("${cmdln[@]}" 2>&1)" || \
+        fail_cmd comma "'retype init' command failed" "${cmdln[*]}" "${result}"
+
       echo ", show command output.
 ::warning::No Retype configuration file found, using default setting values.
-::group::Command: retype init --verbose
+::group::See result...
+retype init --verbose
 ${result}
 ::endgroup::"
       echo -n "Setting up build arguments: resume, "
@@ -122,7 +170,7 @@ ${result}
       cf_count="$(echo "${locate_cf}" | wc -l)"
 
       if [ ${cf_count} -ne 1 ]; then
-       fail_nl "More than one possible Retype configuration files found. Please remove extra files or specify the desired path with the 'config' argument (https://github.com/retypeapp/action-build#specify-path-to-the-retypeyml-file). See output for the list of paths found.
+       fail_nl "More than one possible Retype configuration file was found. Please remove the extra file(s) or specify the desired path with the 'config' argument (https://github.com/retypeapp/action-build#specify-path-to-the-retypeyml-file). See output for the list of paths found.
 
 Configuration files located:
 ${locate_cf}"
@@ -132,12 +180,6 @@ ${locate_cf}"
       fi
     fi
   fi
-fi
-
-if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
-  echo -n "base, "
-  overridestr="$(append_json "${overridestr}" "base" "${INPUT_OVERRIDE_BASE}")" || \
-    fail_nl "Unable to append 'base' setting while building the 'retype build' argument list."
 fi
 
 if [ "${INPUT_STRICT}" == "true" ]; then
@@ -160,9 +202,8 @@ ${overridestr}
 }"
 cmdargs+=("--override" "${overridestr}")
 
-echo "done."
-
-echo -n "Building documentation: "
+echo ""
+echo "Building documentation... "
 
 cmdln=(retype build "${cmdargs[@]}")
 result="$("${cmdln[@]}" 2>&1)" || \
@@ -172,9 +213,9 @@ if [ ! -e "${destdir}/resources/js/config.js" ]; then
   fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output."
 fi
 
-echo "done."
+echo "::group::See result...
+${cmdln[@]}
 
-echo "::group::Command: ${cmdln[@]}
 ${result}
 ::endgroup::"
 
@@ -183,34 +224,32 @@ if ${missing_retypecf}; then
     fail_cmd true "unable to remove default retype.yml placed into repo root" "rm \"retype.yml\"" "${result}"
 fi
 
-echo -n "Documentation built to: ${destdir}"
 if [ "${config_output}" != "${destdir}" ]; then
-  echo -n " (${config_output})"
+  echo " (${config_output})"
 fi
-echo "" # break line after the message above is done being composed.
 
 # This makes the output path available via the
 # 'steps.stepId.outputs.retype-output-path' reference, unique for the step.
-echo "retype-output-path=${destdir}" >> "${GITHUB_OUTPUT}"
+echo "retype-output-path=${workflowdir}" >> "${GITHUB_OUTPUT}"
 
 # This makes the output path available via the $RETYPE_OUTPUT_PATH that doesn't
 # require referencing but is reset by the last ran build step if more than one
 # are assigned to a job.
-echo "RETYPE_OUTPUT_PATH=${destdir}" >> "${GITHUB_ENV}"
+echo "RETYPE_OUTPUT_PATH=${workflowdir}" >> "${GITHUB_ENV}"
 
 # perform a quick clean-up to remove temporary, untracked files
-echo -n "Cleaning up repository: git-reset"
+echo -n "Cleaning up repository with"
 
 result="$(git reset HEAD -- . 2>&1)" || \
-  fail_cmd comma "unable to git-reset repository back to HEAD after Retype build." "git checkout -- ." "${result}"
+  fail_cmd comma "unable to git-reset repository back to HEAD after Retype build." "git reset HEAD -- ." "${result}"
 
-echo -n ", git-checkout"
+echo -n " git-checkout"
 result="$(git checkout -- . 2>&1)" || \
-  fail_cmd comma "unable to git-checkout repository afresh after Retype build." "git checkout -- ." "${result}"
+  fail_cmd comma "unable to git-checkout repository after Retype build." "git checkout -- ." "${result}"
 
-echo -n ", git-clean"
+echo -n " git-clean"
 result="$(git clean -d -x -q -f 2>&1)" || \
   fail_cmd comma "unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
 
-echo ", done.
-Retype documentation build completed successfully."
+echo ""
+echo "Retype build completed successfully"
