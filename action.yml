@@ -12,6 +12,10 @@ inputs:
       License key to use with Retype. The Retype license key is private.
       Please store your license key as a GitHub secret.
     required: false
+  password:
+    description: |-
+      Private page password.
+    required: false
   config:
     description: |-
       Path to the retype.yml file. May point to a directory, a JSON or YAML
@@ -40,5 +44,6 @@ runs:
         INPUT_OVERRIDE_TITLE: ${{ inputs.title }}
         INPUT_OVERRIDE_BASE: ${{ inputs.base }}
         INPUT_LICENSE_KEY: ${{ inputs.license }}
+        INPUT_PAGE_PASSWORD: ${{ inputs.password }}
         INPUT_STRICT: ${{ inputs.strict }}
         INPUT_CONFIG_PATH: ${{ inputs.config }}

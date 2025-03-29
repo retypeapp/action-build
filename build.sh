@@ -150,6 +150,11 @@ if [ ! -z "${INPUT_LICENSE_KEY}" ]; then
   cmdargs+=("--secret" "${INPUT_LICENSE_KEY}")
 fi
 
+if [ ! -z "${INPUT_PAGE_PASSWORD}" ]; then
+  echo -n "password, "
+  cmdargs+=("--password" "${INPUT_PAGE_PASSWORD}")
+fi
+
 overridestr="{
 ${overridestr}
 }"
