@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Variables
-retype_version="3.5.0"
+retype_version="3.6.0"
+
 use_dotnet=false
 _ifs="${IFS}"
 
@@ -189,6 +190,11 @@ fi
 if [ ! -z "${INPUT_LICENSE_KEY}" ]; then
   echo -n "license key, "
   cmdargs+=("--secret" "${INPUT_LICENSE_KEY}")
+fi
+
+if [ ! -z "${INPUT_PAGE_PASSWORD}" ]; then
+  echo -n "password, "
+  cmdargs+=("--password" "${INPUT_PAGE_PASSWORD}")
 fi
 
 overridestr="{
