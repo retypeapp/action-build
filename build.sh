@@ -30,7 +30,7 @@ fi
 echo "Working directory is: $(pwd)"
 
 # We prefer dotnet if available as the package size is (much) smaller.
-if which dotnet > /dev/null 2>&1 && [ "$(dotnet --version | cut -f1 -d.)" -9 ]; then
+if which dotnet > /dev/null 2>&1 && [ "$(dotnet --version | cut -f1 -d.)" -ge 9 ]; then
   use_dotnet=true
 elif ! which node > /dev/null 2>&1 || [ "$(node --version | cut -f1 -d. | cut -b2-)" -lt 18 ]; then
   fail "Cannot find a suitable dotnet or node installation to install the retype package with."
