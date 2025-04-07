@@ -5,10 +5,20 @@ retype_version="3.7.0"
 use_dotnet=false
 _ifs="${IFS}"
 
-echo "Testing..."
-echo "Installing Retype Version: ${retype_version}"
-echo "Node.js version:"
-node --version
+echo "Retype version: ${retype_version}"
+
+if ! which node > /dev/null 2>&1; then
+    echo "Node.js not available"
+else
+    echo "Node.js version: $(node --version)"
+fi
+
+if ! which dotnet > /dev/null 2>&1; then
+    echo "dotnet not available"
+else
+    echo "dotnet version: $(dotnet --version)"
+fi
+
 
 if [ ! -e "${GITHUB_ACTION_PATH}/functions.inc.sh" ]; then
   echo "::error file=${BASH_SOURCE},line=${LINENO}::Unable to locate functions.inc.sh file."
