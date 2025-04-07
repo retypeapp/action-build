@@ -98,7 +98,7 @@ else
   fi
 fi
 
-echo -n "Determining temporary target folder to place parsed documentation: "
+echo -n "Get output location: "
 # by letting it create the directory we can guarantee no other call of mktemp could reference
 # the same path.
 destdir="$(mktemp -d)"
