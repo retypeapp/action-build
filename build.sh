@@ -5,6 +5,11 @@ retype_version="3.7.0"
 use_dotnet=false
 _ifs="${IFS}"
 
+echo "Testing..."
+echo "Installing Retype Version: ${retype_version}"
+echo "Node.js version:"
+node --version
+
 if [ ! -e "${GITHUB_ACTION_PATH}/functions.inc.sh" ]; then
   echo "::error file=${BASH_SOURCE},line=${LINENO}::Unable to locate functions.inc.sh file."
   exit 1
@@ -25,9 +30,9 @@ fi
 echo "Working directory is: $(pwd)"
 
 # We prefer dotnet if available as the package size is (much) smaller.
-if which dotnet > /dev/null 2>&1 && [ "$(dotnet --version | cut -f1 -d.)" -ge 5 ]; then
+if which dotnet > /dev/null 2>&1 && [ "$(dotnet --version | cut -f1 -d.)" -9 ]; then
   use_dotnet=true
-elif ! which node > /dev/null 2>&1 || [ "$(node --version | cut -f1 -d. | cut -b2-)" -lt 14 ]; then
+elif ! which node > /dev/null 2>&1 || [ "$(node --version | cut -f1 -d. | cut -b2-)" -lt 18 ]; then
   fail "Cannot find a suitable dotnet or node installation to install the retype package with."
 fi
 
@@ -49,7 +54,7 @@ else
   if ${use_dotnet}; then
     echo -n "dotnet tool: "
 
-    cmdln=(dotnet tool install --global --version ${retype_version} retypeapp)
+    cmdln=(dotnet tool install --global retypeapp --version ${retype_version})
     result="$("${cmdln[@]}" 2>&1)" || \
       fail_cmd true "unable to install retype using the dotnet tool" "${cmdln[@]}" "${result}"
   else
