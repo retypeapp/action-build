@@ -5,7 +5,7 @@ retype_version="3.7.0"
 use_dotnet=false
 _ifs="${IFS}"
 
-echo "Retype version: ${retype_version}"
+echo "Retype version: v${retype_version}"
 
 if ! which node > /dev/null 2>&1; then
     echo "Node.js not available"
@@ -16,9 +16,8 @@ fi
 if ! which dotnet > /dev/null 2>&1; then
     echo "dotnet not available"
 else
-    echo "dotnet version: $(dotnet --version)"
+    echo "dotnet version: v$(dotnet --version)"
 fi
-
 
 if [ ! -e "${GITHUB_ACTION_PATH}/functions.inc.sh" ]; then
   echo "::error file=${BASH_SOURCE},line=${LINENO}::Unable to locate functions.inc.sh file."
@@ -65,8 +64,12 @@ else
     echo -n "dotnet tool: "
 
     cmdln=(dotnet tool install --global retypeapp --version ${retype_version})
+
+    echo "Installing Retype using the command:"
+    echo "${cmdln[*]}"
+
     result="$("${cmdln[@]}" 2>&1)" || \
-      fail_cmd true "unable to install retype using the dotnet tool" "${cmdln[@]}" "${result}"
+      fail_cmd true "Unable to install Retype using the dotnet tool" "${cmdln[@]}" "${result}"
   else
     case "${RUNNER_OS}" in
       "Linux") plat="linux-x64";;
@@ -84,8 +87,12 @@ else
     echo -n "NPM package manager (${plat}): "
 
     cmdln=(npm install --global "retypeapp-${plat}@${retype_version}")
+
+    echo "Installing Retype using the command:"
+    echo "${cmdln[*]}"
+
     result="$("${cmdln[@]}" 2>&1)" || \
-      fail_cmd true "unable to install retype using the NPM package manager" "${cmdln[@]}" "${result}"
+      fail_cmd true "Unable to install Retype using the NPM package manager" "${cmdln[@]}" "${result}"
   fi
   echo "done."
 fi
