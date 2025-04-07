@@ -23,7 +23,7 @@ if [ "${OSTYPE}" == "msys" ]; then
   MSYS_TMPDIR="$(mount | egrep "^[^ ]+ on /tmp type" | cut -f1 -d" ")"
 
   if [ -z "${MSYS_TMPDIR}" ]; then
-    fail "unable to query MSYS mounted /tmp/ directory. Current mtab:
+    fail "Unable to query MSYS mounted /tmp/ directory. Current mtab:
 $(mount)
 ----
 

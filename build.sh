@@ -13,10 +13,10 @@ else
     echo "Node.js version: $(node --version)"
 fi
 
-if ! which dotnet > /dev/null 2>&1; then
+if ! command -v dotnet &> /dev/null; then
     echo "dotnet not available"
 else
-    echo "dotnet version: v$(dotnet --version)"
+    echo "dotnet version: $(dotnet --version)"
 fi
 
 if [ ! -e "${GITHUB_ACTION_PATH}/functions.inc.sh" ]; then
@@ -42,7 +42,7 @@ echo "Working directory: $(pwd)"
 if which dotnet > /dev/null 2>&1 && [ "$(dotnet --version | cut -f1 -d.)" -ge 9 ]; then
   use_dotnet=true
 elif ! which node > /dev/null 2>&1 || [ "$(node --version | cut -f1 -d. | cut -b2-)" -lt 18 ]; then
-  fail "Cannot find a suitable dotnet or node installation to install the retype package with."
+  fail "Cannot find a suitable dotnet or node installation to install the retype package with"
 fi
 
 retype_path="$(which retype 2> /dev/null)"
@@ -52,7 +52,7 @@ if [ ${retstat} -eq 0 ]; then
   if [ "$(retype --version | strings)" == "${retype_version}" ]; then
     echo "Using existing retype installation at: ${retype_path}"
   else
-    fail "Found existing installation of retype for a different version than this action is intended to work with.
+    fail "Found existing installation of retype for a different version than this action is intended to work with
 Expected version: ${retype_version}
 Available version: $(retype --version | strings)
 
@@ -80,7 +80,7 @@ else
       *)
         echo "an unsupported OS."
         if [ -z "${RUNNER_OS}" ]; then
-          fail "Unable to determine runner's OS to choose which NPM package to download."
+          fail "Unable to determine runner's OS to choose which NPM package to download"
         else
           fail "Unsupported runner OS: ${RUNNER_OS}"
         fi
@@ -107,10 +107,10 @@ echo "${destdir}"
 echo -n "Setting up build arguments: "
 
 # cf_path ensures path is converted in case we are running from windows
-config_output="$(cf_path "${destdir}")" || fail_nl "unable to parse output path: ${destdir}"
+config_output="$(cf_path "${destdir}")" || fail_nl "Unable to parse output path: ${destdir}"
 cmdargs=(--verbose)
 overridestr="$(append_json "" "output" "${config_output}")" || \
-  fail_nl "Unable to append output path setting while building the 'retype build' argument list."
+  fail_nl "Unable to append output path setting while building the 'retype build' argument list"
 
 missing_retypecf=false
 if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
@@ -160,7 +160,7 @@ fi
 if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
   echo -n "base, "
   overridestr="$(append_json "${overridestr}" "base" "${INPUT_OVERRIDE_BASE}")" || \
-    fail_nl "Unable to append 'base' setting while building the 'retype build' argument list."
+    fail_nl "Unable to append 'base' setting while building the 'retype build' argument list"
 fi
 
 if [ "${INPUT_STRICT}" == "true" ]; then
@@ -192,7 +192,7 @@ result="$("${cmdln[@]}" 2>&1)" || \
   fail_cmd true "retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"
 
 if [ ! -e "${destdir}/resources/js/config.js" ]; then
-  fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output."
+  fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output"
 fi
 
 echo "done"
@@ -203,10 +203,10 @@ ${result}
 
 if ${missing_retypecf}; then
   result="$(rm "retype.yml" 2>&1)" || \
-    fail_cmd true "unable to remove default retype.yml placed into repo root" "rm \"retype.yml\"" "${result}"
+    fail_cmd true "Unable to remove default retype.yml placed into repo root" "rm \"retype.yml\"" "${result}"
 fi
 
-echo -n "Documentation built to: ${destdir}"
+echo -n "Documentation output: ${destdir}"
 if [ "${config_output}" != "${destdir}" ]; then
   echo -n " (${config_output})"
 fi
@@ -225,15 +225,15 @@ echo "RETYPE_OUTPUT_PATH=${destdir}" >> "${GITHUB_ENV}"
 echo -n "Cleaning up repository: git-reset"
 
 result="$(git reset HEAD -- . 2>&1)" || \
-  fail_cmd comma "unable to git-reset repository back to HEAD after Retype build." "git checkout -- ." "${result}"
+  fail_cmd comma "Unable to git-reset repository back to HEAD after Retype build." "git checkout -- ." "${result}"
 
 echo -n ", git-checkout"
 result="$(git checkout -- . 2>&1)" || \
-  fail_cmd comma "unable to git-checkout repository afresh after Retype build." "git checkout -- ." "${result}"
+  fail_cmd comma "Unable to git-checkout repository afresh after Retype build." "git checkout -- ." "${result}"
 
 echo -n ", git-clean"
 result="$(git clean -d -x -q -f 2>&1)" || \
-  fail_cmd comma "unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
+  fail_cmd comma "Unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
 
 echo ", done
-Retype documentation build completed successfully."
+Retype documentation build completed successfully"
