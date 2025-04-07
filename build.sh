@@ -36,7 +36,7 @@ if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
   echo "Path to Retype config: ${INPUT_CONFIG_PATH}"
 fi
 
-echo "Working directory is: $(pwd)"
+echo "Working directory: $(pwd)"
 
 # We prefer dotnet if available as the package size is (much) smaller.
 if which dotnet > /dev/null 2>&1 && [ "$(dotnet --version | cut -f1 -d.)" -ge 9 ]; then
@@ -65,11 +65,13 @@ else
 
     cmdln=(dotnet tool install --global retypeapp --version ${retype_version})
 
+    result="$("${cmdln[@]}" 2>&1)" || \
+      fail_cmd true "Unable to install Retype using the dotnet tool" "${cmdln[@]}" "${result}"
+    
+    echo "done"
     echo "Installing Retype using the command:"
     echo "${cmdln[*]}"
 
-    result="$("${cmdln[@]}" 2>&1)" || \
-      fail_cmd true "Unable to install Retype using the dotnet tool" "${cmdln[@]}" "${result}"
   else
     case "${RUNNER_OS}" in
       "Linux") plat="linux-x64";;
@@ -88,13 +90,12 @@ else
 
     cmdln=(npm install --global "retypeapp-${plat}@${retype_version}")
 
-    echo "Installing Retype using the command:"
-    echo "${cmdln[*]}"
-
     result="$("${cmdln[@]}" 2>&1)" || \
       fail_cmd true "Unable to install Retype using the NPM package manager" "${cmdln[@]}" "${result}"
+
+    echo "done"
+    echo "Command: ${cmdln[*]}"
   fi
-  echo "done."
 fi
 
 echo -n "Determining temporary target folder to place parsed documentation: "
@@ -182,7 +183,7 @@ ${overridestr}
 }"
 cmdargs+=("--override" "${overridestr}")
 
-echo "done."
+echo "done"
 
 echo -n "Building documentation: "
 
@@ -194,7 +195,7 @@ if [ ! -e "${destdir}/resources/js/config.js" ]; then
   fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output."
 fi
 
-echo "done."
+echo "done"
 
 echo "::group::Command: ${cmdln[@]}
 ${result}
@@ -234,5 +235,5 @@ echo -n ", git-clean"
 result="$(git clean -d -x -q -f 2>&1)" || \
   fail_cmd comma "unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
 
-echo ", done.
+echo ", done
 Retype documentation build completed successfully."
