@@ -199,8 +199,12 @@ fi
 echo "done"
 echo -n "Building documentation: "
 
+echo "cmdargs content: ${cmdargs[@]}"
+echo "Number of elements in cmdargs: ${#cmdargs[@]}"
+echo
+
 # Create the initial command with mandatory parts
-cmdln=("retype build ${destdir}")
+cmdln=("retype" "build")
 
 echo
 echo "args: ${cmdargs[@]}"
@@ -208,10 +212,15 @@ echo
 
 # Only append cmdargs if it is not empty
 if [ ${#cmdargs[@]} -gt 0 ]; then
-    cmdln+=("${cmdargs[@]}")  # Append all elements of cmdargs to cmdln
+  echo
+  echo "WE FOUND ARGS: ${cmdargs[@]}"
+  echo
+
+  cmdln+=("${cmdargs[@]}")  # Append all elements of cmdargs to cmdln
 fi
 
-echo "Retype build command: ${cmdln}"
+echo -n "Retype build command: "
+echo "${cmdln[@]}"
 
 # Execute the command
 "${cmdln[@]}"
