@@ -40,16 +40,16 @@ There is a small performance gain if a `dotnet` environment is configured as the
 
 ## Inputs
 
-Configuration of the project should be done in the projects [`retype.yml`](https://retype.com/configuration/project) file.
+Configuration of the project should be done in the projects [`.github/workflows/retype-action.yml`](https://retype.com/guides/github-actions/#retype_secret) file.
 
-### `config_path`
+### `output`
 
-Specifies the path where `retype.yml` file should be located or path to the specific configuration file. Default is `""` (empty).
+Custom folder to store the output from the Retype build process. Default is `""` (empty).
 
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    config_path: my_sub_directory/
+    output: my_output_directory/
 ```
 
 ### `secret`
@@ -61,10 +61,10 @@ Please store your license key as a GitHub [Secret](https://retype.com/guides/git
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    secret: ${{ secrets.RETYPE_LICENSE_KEY }}
+    secret: ${{ secrets.RETYPE_SECRET }}
 ```
 
-The `secret` can also be set using Environment variables.
+The `secret` can also be set using `env` Environment variables.
 
 ```yaml
 - uses: retypeapp/action-build@latest
@@ -72,7 +72,7 @@ The `secret` can also be set using Environment variables.
     RETYPE_SECRET: ${{ secrets.RETYPE_SECRET }}
 ```
 
-**NOTICE**: The `secret` value cannot be saved directly to your configuration file. To pass a license key to Retype during the build process, the value must be passed as a GitHub Secret. For information on how to store a secret on your repository or organization, see [RETYPE_SECRET](https://retype.com/guides/github-actions/#retype_secret) docs.
+**IMPORTANT**: The `secret` value cannot be saved directly to your workflow configuration file. To pass a license key to Retype during the build process, the value must be passed as a GitHub Secret. For information on how to store a secret on your repository or organization, see [RETYPE_SECRET](https://retype.com/guides/github-actions/#retype_secret) docs.
 
 ### `password`
 
@@ -84,7 +84,7 @@ Private password used to generate private and protected pages. See additional do
     password: ${{ secrets.PASSWORD }}
 ```
 
-The `password` can also be set using Environment variables.
+The `password` can also be set using `env` Environment variables.
 
 ```yaml
 - uses: retypeapp/action-build@latest
@@ -126,12 +126,14 @@ Enable verbose logging during build process. Default is `false`.
 
 ### `config_path`
 
-Path to the `retype.yml` file. May point to a directory, a JSON or YAML file. If a directory, Retype will look for the `retype.[yml|yaml|json]` file in this directory.
+Specifies the path where `retype.yml` file should be located or path to the specific configuration file. Default is `""` (empty).
+
+May point to a directory, a JSON or YAML file. If a directory, Retype will look for the `retype.[yml|yaml|json]` file in this directory.
 
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    config_path: sub-directory
+    config_path: my_sub_directory/
 ```
 
 ## Outputs
@@ -179,12 +181,12 @@ steps:
 
 ### Specify a Retype license key
 
-If a license key is required, please configure using a GitHub Secret.
+If a license key is required, please configure using a GitHub Secret. See `RETYPE_SECRET` [documentation](https://retype.com/guides/github-actions/#retype_secret).
 
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    secret: ${{ secrets.RETYPE_LICENSE_KEY }}
+    secret: ${{ secrets.RETYPE_SECRET }}
 ```
 
 For more information on how to set up and use secrets in GitHub actions, see [Encrypted secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
