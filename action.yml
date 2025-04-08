@@ -17,7 +17,7 @@ inputs:
     default: ''
   password:
     description: |-
-      Private page password.
+      Private password used to generate private and protected pages.
     required: false
     default: ''
   strict:
@@ -40,7 +40,7 @@ inputs:
   config_path:
     description: |-
       Path to the retype.yml file. May point to a directory, a JSON or YAML
-      file. When a directory, Retype will look for the 'retype.[yml|yaml|json]' 
+      file. If a directory, Retype will look for the 'retype.[yml|yaml|json]' 
       file in this directory.
     default: ''
 outputs:
@@ -62,4 +62,4 @@ runs:
         INPUT_STRICT: ${{ inputs.strict }}
         INPUT_OVERRIDE: ${{ inputs.override }}
         INPUT_VERBOSE: ${{ inputs.verbose }}
-        INPUT_CONFIG_PATH: ${{ inputs.config_path }}
+        INPUT_CONFIG_PATH: ${{ inputs.config_path || inputs.config }}
