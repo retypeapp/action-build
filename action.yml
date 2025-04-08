@@ -6,7 +6,7 @@ description: |-
 inputs:
   output:
     description: |-
-      Custom path to the output directory. Default is "" (empty).
+      Path to `retype.yml` file or path to a specific configuration file. Default is `""` (empty).
     required: false
     default: ''
   secret:
