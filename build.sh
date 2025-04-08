@@ -191,7 +191,7 @@ if [ "${INPUT_STRICT}" == "true" ]; then
 fi
 
 if [ ! -z "${INPUT_OVERRIDE}" ]; then
-  cmdargs+=("--overrdie" "${INPUT_OVERRIDE}")
+  cmdargs+=("--override" "${INPUT_OVERRIDE}")
 fi
 
 if [ "${INPUT_VERBOSE}" == "true" ]; then
