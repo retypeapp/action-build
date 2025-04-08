@@ -1,33 +1,48 @@
 name: Retype Build Action
 author: Object.NET, Inc.
 description: |-
-  Builds documentation using Retype. The built output from this step can be
+  Builds documentation using Retype. The output from this step can be
   published to the hosting of choice.
 inputs:
-  base:
-    description: Value to override Retype's "base" config
+  output:
+    description: |-
+      Custom path to the output directory. Default is "" (empty).
     required: false
-  license:
+    default: ''
+  secret:
     description: |-
       License key to use with Retype. The Retype license key is private.
       Please store your license key as a GitHub secret.
     required: false
+    default: ''
   password:
     description: |-
       Private page password.
     required: false
-  config:
-    description: |-
-      Path to the retype.yml file. May point to a directory, a JSON or YAML
-      file. When a directory, Retype will look for 'retype.[yml|yaml|json]' in
-      that directory and use it. If it is a file, Retype will use it
-      regardless.
+    default: ''
   strict:
     description: |-
       Allows the build to return a non-zero exit code if it encounters any
       errors or warnings. This can be particularly helpful for developers when
       they need to validate the stability of their builds. Default is false.
     required: false
+    default: 'false'
+  override:
+    description: |-
+      JSON configuration overriding project config values. Default is "" (empty).
+    required: false
+    default: ''
+  verbose:
+    description: |-
+      Enable verbose logging during build process. Default is false.
+    required: false
+    default: 'false'
+  config:
+    description: |-
+      Path to the retype.yml file. May point to a directory, a JSON or YAML
+      file. When a directory, Retype will look for the 'retype.[yml|yaml|json]' 
+      file in this directory.
+    default: ''
 outputs:
   retype-output-path:
     description: |-
@@ -41,9 +56,10 @@ runs:
       run: "${GITHUB_ACTION_PATH}/build.sh"
       shell: bash
       env:
-        INPUT_OVERRIDE_TITLE: ${{ inputs.title }}
-        INPUT_OVERRIDE_BASE: ${{ inputs.base }}
-        INPUT_LICENSE_KEY: ${{ inputs.license }}
-        INPUT_PAGE_PASSWORD: ${{ inputs.password }}
+        INPUT_OUTPUT: ${{ inputs.output }}
+        INPUT_SECRET: ${{ inputs.secret || inputs.license }}
+        INPUT_PASSWORD: ${{ inputs.password }}
         INPUT_STRICT: ${{ inputs.strict }}
+        INPUT_OVERRIDE: ${{ inputs.override }}
+        INPUT_VERBOSE: ${{ inputs.verbose }}
         INPUT_CONFIG_PATH: ${{ inputs.config }}
