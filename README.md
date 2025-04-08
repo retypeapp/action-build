@@ -14,7 +14,7 @@ This action will look for a [`retype.yml`](https://retype.com/configuration/proj
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 
 - uses: retypeapp/action-build@latest
 ```
@@ -27,40 +27,74 @@ The workflow file above would then become:
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 
-- uses: actions/setup-dotnet@v1
+- uses: actions/setup-dotnet@v4
   with:
-    dotnet-version: 7.0.x
+    dotnet-version: 9.0.x
 
 - uses: retypeapp/action-build@latest
 ```
 
-If this is not included though, the action will still work, but it may need to use the NPM package in case the installed .NET version is not the one required by Retype. When resorting to the NPM package it may take a bit longer to set up the workflow due to the larger download size. It may also be the case that the GitHub runner is an unsupported OS by the NPM packages; as long as it has .NET installed, Retype should work regardless of the OS. But the NPM package is built targetted to specific OS'es, namely Linux, Mac and Windows.
+There is a small performance gain if a `dotnet` environment is configured as the package download is smaller, but `dotnet` is not required and can be excluded.
 
 ## Inputs
 
-Configuration of the project should be done in the projects [`retype.yml`](https://retype.com/configuration/project) file.
+Configuration of the project should be done in the projects [`.github/workflows/retype-action.yml`](https://retype.com/guides/github-actions/#retype_secret) file.
 
-### `config`
+### `output`
 
-Specifies the path where `retype.yml` file should be located or path to the specific configuration file.
-
-### `license`
-
-Specifies the license key to be used with Retype.
+Custom folder to store the output from the Retype build process. Default is `""` (empty).
 
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    license: ${{ secrets.RETYPE_LICENSE_KEY }}
+    output: my_output_directory/
 ```
 
-**NOTICE**: The `license` key value cannot be saved directly to your configuration file. To pass the license key to Retype during the build process, the value must be passed as a GitHub Secret. For information on how to store a secret on your repository or organization, see [RETYPE_SECRET](https://retype.com/configuration/envvars/#retype_secret) docs.
+### `secret`
+
+License key to use with Retype. The Retype license key is private. 
+
+Please store your license key as a GitHub [Secret](https://retype.com/guides/github-actions/#retype_secret).
+
+```yaml
+- uses: retypeapp/action-build@latest
+  with:
+    secret: ${{ secrets.RETYPE_SECRET }}
+```
+
+The `secret` can also be set using `env` Environment variables.
+
+```yaml
+- uses: retypeapp/action-build@latest
+  env:
+    RETYPE_SECRET: ${{ secrets.RETYPE_SECRET }}
+```
+
+**IMPORTANT**: The `secret` value cannot be saved directly to your workflow configuration file. To pass a license key to Retype during the build process, the value must be passed as a GitHub Secret. For information on how to store a secret on your repository or organization, see [RETYPE_SECRET](https://retype.com/guides/github-actions/#retype_secret) docs.
+
+### `password`
+
+Private password used to generate private and protected pages. See additional docs on how to configure [`password`](https://retype.com/guides/github-actions/#retype_password). Default is `""` (empty).
+
+```yaml
+- uses: retypeapp/action-build@latest
+  with:
+    password: ${{ secrets.PASSWORD }}
+```
+
+The `password` can also be set using `env` Environment variables.
+
+```yaml
+- uses: retypeapp/action-build@latest
+  env:
+    RETYPE_PASSWORD: ${{ secrets.RETYPE_PASSWORD }}
+```
 
 ### `strict`
 
-This config is Retype [!badge PRO](https://retype.com/pro/) only.
+This config is Retype [!badge PRO](https://retype.com/pro/) only. Default is `false`.
 
 To enable [`--strict`](https://retype.com/guides/cli/#options-2) mode during build. Return a non-zero exit code if the build had errors or warnings.
 
@@ -68,6 +102,48 @@ To enable [`--strict`](https://retype.com/guides/cli/#options-2) mode during bui
 - uses: retypeapp/action-build@latest
   with:
     strict: true
+```
+
+### `override`
+
+JSON configuration overriding project config values. Default is `""` (empty).
+
+```yaml
+- uses: retypeapp/action-build@latest
+  with:
+    override: '{"url": "https://example.com"}'
+```
+
+### `verbose`
+
+Enable verbose logging during build process. Default is `false`.
+
+```yaml
+- uses: retypeapp/action-build@latest
+  with:
+    verbose: true
+```
+
+### `config_path`
+
+Specifies the path where `retype.yml` file should be located or path to the specific configuration file. Default is `""` (empty).
+
+May point to a directory, a JSON or YAML file. If a directory, Retype will look for the `retype.[yml|yaml|json]` file in this directory.
+
+```yaml
+- uses: retypeapp/action-build@latest
+  with:
+    config_path: my_sub_directory/
+```
+
+## Outputs
+
+### `RETYPE_OUTPUT_PATH`
+
+Path to the Retype output location that can be referenced in other steps within the same workflow.
+
+```sh
+echo "${RETYPE_OUTPUT_PATH}"
 ```
 
 ## Examples
@@ -89,40 +165,40 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: retypeapp/action-build@latest
 ```
 
 Here are a few common workflow scenarios.
 
-### Most common setup
+### Minimum configuration for building a Retype project
 
 ```yaml
 steps:
   - uses: retypeapp/action-build@latest
 ```
 
-## Specify a Retype license key
+### Specify a Retype license key
 
-If a `license` key is required, please configure using a GitHub Secret.
+If a license key is required, please configure using a GitHub Secret. See `RETYPE_SECRET` [documentation](https://retype.com/guides/github-actions/#retype_secret).
 
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    license: ${{ secrets.RETYPE_LICENSE_KEY }}
+    secret: ${{ secrets.RETYPE_SECRET }}
 ```
 
 For more information on how to set up and use secrets in GitHub actions, see [Encrypted secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
-## Specify path to the retype.yml file
+### Specify path to the retype.yml file
 
 It is possible to point the directory where `retype.yml` is:
 
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    config: my_docs
+    config_path: my_docs
 ```
 
 Or the full path (relative to the repository root) to retype.yml
@@ -130,7 +206,7 @@ Or the full path (relative to the repository root) to retype.yml
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    config: my_docs/retype.yml
+    config_path: my_docs/retype.yml
 ```
 
 The config file may have a different file name
@@ -138,27 +214,27 @@ The config file may have a different file name
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    config: my_docs/retype-staging.json
+    config_path: my_docs/retype-staging.json
 ```
 
 In a bit more complex scenario where various repositories are checked out in a workflow. This may be useful, for instance, if retype documentation is generated from files across different repositories.
 
 ```yaml
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
   with:
     path: own-repository
 
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
   with:
     repository: organization/repository-name
     path: auxiliary-repository
 
 - uses: retypeapp/action-build@latest
   with:
-    config: own-repository/my_docs/retype.yml
+    config_path: own-repository/my_docs/retype.yml
 ```
 
-## Passing the output path to another action
+### Passing the output path to another action
 
 It is possible to get the output path of this step to use in other steps or actions after the `action-build` is complete by using the `retype-output-path` value.
 
@@ -178,7 +254,7 @@ It is required to upload the output with [actions/upload-artifact](https://githu
 
 The following sample demonstrates the [`upload-artifact`](https://github.com/actions/upload-artifact) and [`download-artifact`](https://github.com/actions/download-artifact) actions.
 
-## Uploading the output as an artifact
+### Uploading the output as an artifact
 
 To use the Retype output in another job within the same workflow, or let an external source download it, it is possible to use [`actions/upload-artifact`](https://github.com/actions/upload-artifact) to persist the files. The uploaded artifact can then be retrieved in another job or workflow using [`actions/download-artifact`](https://github.com/actions/download-artifact)
 
@@ -191,7 +267,7 @@ To use the Retype output in another job within the same workflow, or let an exte
     path: ${{ steps.build1.outputs.retype-output-path }}
 ```
 
-## Publishing to GitHub Pages
+### Publishing to GitHub Pages
 
 By using the Retype [retypeapp/action-github-pages](https://github.com/retypeapp/action-github-pages) action, the workflow can publish the output to a branch, or directory, or even a make a Pull Request. The website can then be hosted using [GitHub Pages](https://docs.github.com/en/github/working-with-github-pages/getting-started-with-github-pages).
 
@@ -214,7 +290,7 @@ You can test with a specific branch of the retypapp action by replacing the `@la
 - uses: retypeapp/action-build@branch-name-here
 ```
 
-## Build in `--strict` mode
+### Build in `--strict` mode
 
 Return a non-zero exit code if the build had errors or warnings. Set `true` to enable stict mode.
 
@@ -222,4 +298,12 @@ Return a non-zero exit code if the build had errors or warnings. Set `true` to e
 - uses: retypeapp/action-build@latest
   with:
     strict: true
+```
+
+### Turn on `--verbose` logging
+
+```yaml
+- uses: retypeapp/action-build@latest
+  with:
+    verbose: true
 ```
