@@ -121,6 +121,7 @@ missing_retypecf=false
 if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
   # In case path is a directory and there's no Retype conf file, the process
   # is supposed to fail (we won't try 'retype init')
+  echo "INPUT_CONFIG_PATH: ${INPUT_CONFIG_PATH}"
   echo -n "${INPUT_CONFIG_PATH}, "
   cmdargs+=("${INPUT_CONFIG_PATH}")
 else
@@ -163,6 +164,7 @@ ${locate_cf}"
 fi
 
 echo
+echo "CURRENT ARGS: ${cmdargs}"
 echo "INPUT_OUTPUT: ${INPUT_OUTPUT}"
 echo
 
