@@ -67,9 +67,6 @@ else
       fail_cmd true "Unable to install Retype using the dotnet tool" "${cmdln[@]}" "${result}"
     
     echo "done"
-    echo "Installing Retype using the command:"
-    echo "${cmdln[*]}"
-
   else
     case "${RUNNER_OS}" in
       "Linux") plat="linux-x64";;
@@ -152,6 +149,11 @@ ${locate_cf}"
   fi
 fi
 
+if [ ! -z "${INPUT_OUTPUT}" ]; then
+  echo -n "output set, "
+  cmdargs+=("--output" "${INPUT_OUTPUT}")
+fi
+
 if [ ! -z "${INPUT_SECRET}" ]; then
   echo -n "set secret, "
   cmdargs+=("--secret" "${INPUT_SECRET}")
@@ -181,11 +183,14 @@ echo "done"
 echo -n "Building documentation: "
 
 cmdln=(retype build "${cmdargs[@]}")
+
+echo "Retype build command: ${cmdln}"
+
 result="$("${cmdln[@]}" 2>&1)" || \
   fail_cmd true "Retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"
 
 if [ ! -e "${destdir}/resources/js/config.js" ]; then
-  fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output."
+  fail_nl "Retype output not found after building."
 fi
 
 echo "done"
