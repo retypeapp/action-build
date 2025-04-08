@@ -206,12 +206,6 @@ if [ ${#cmdargs[@]} -gt 0 ]; then
   cmdln+=("${cmdargs[@]}")  # Append all elements of cmdargs to cmdln
 fi
 
-echo -n "Retype build command: "
-echo "${cmdln[@]}"
-
-# Execute the command
-"${cmdln[@]}"
-
 result="$("${cmdln[@]}" 2>&1)" || \
   fail_cmd true "Retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"
 
@@ -219,7 +213,7 @@ if [ ! -e "${destdir}/resources/js/config.js" ]; then
   fail_nl "Retype output not found after building."
 fi
 
-echo "::group::Command: ${cmdln[@]}
+echo "::group::Retype build command: ${cmdln[@]}
 ${result}
 ::endgroup::"
 
