@@ -93,13 +93,26 @@ else
   fi
 fi
 
-echo -n "Get output location: "
-# by letting it create the directory we can guarantee no other call of mktemp could reference
-# the same path.
+# Create a temporary directory for the base destination
 destdir="$(mktemp -d)"
-echo "${destdir}"
+echo "Base directory: ${destdir}"
 
-echo -n "Setting up build arguments: "
+# Check if INPUT_OUTPUT is provided and append it to destdir correctly
+if [ -n "${INPUT_OUTPUT}" ]; then
+  # Normalize INPUT_OUTPUT to remove leading and trailing slashes
+  normalized_output="$(echo "${INPUT_SUBDIR}" | sed 's:^/*::;s:/*$::')"
+
+  # Append normalized path to destdir
+  destdir="${destdir}/${normalized_output}"
+  mkdir -p "${destdir}"  # Ensure the directory exists
+
+  echo "Adding output sub-directory"
+  echo "Final destination directory: ${destdir}"
+fi
+
+echo "Check directory: ${destdir}"
+
+echo -n "Configure build arguments: "
 
 # cf_path ensures path is converted in case we are running from windows
 config_output="$(cf_path "${destdir}")" || fail_nl "Unable to parse output path: ${destdir}"
@@ -147,11 +160,6 @@ ${locate_cf}"
       fi
     fi
   fi
-fi
-
-if [ ! -z "${INPUT_OUTPUT}" ]; then
-  echo -n "output set, "
-  cmdargs+=("--output" "${INPUT_OUTPUT}")
 fi
 
 if [ ! -z "${INPUT_SECRET}" ]; then
