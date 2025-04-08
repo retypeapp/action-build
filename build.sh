@@ -97,9 +97,9 @@ fi
 destdir="$(mktemp -d)"
 echo "Base directory: ${destdir}"
 
-# Check if INPUT_OUTPUT is provided and append it to destdir correctly
-if [ -n "${INPUT_OUTPUT}" ]; then
-  # Normalize INPUT_OUTPUT to remove leading and trailing slashes
+# Check if INPUT_SUBDIR is provided and append it to destdir correctly
+if [ -n "${INPUT_SUBDIR}" ]; then
+  # Normalize INPUT_SUBDIR to remove leading and trailing slashes
   normalized_output="$(echo "${INPUT_SUBDIR}" | sed 's:^/*::;s:/*$::')"
 
   # Append normalized path to destdir
