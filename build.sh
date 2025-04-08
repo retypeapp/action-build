@@ -94,7 +94,7 @@ else
       fail_cmd true "Unable to install Retype using the NPM package manager" "${cmdln[@]}" "${result}"
 
     echo "done"
-    echo "Command: ${cmdln[*]}"
+    echo "Retype install command: ${cmdln[*]}"
   fi
 fi
 
@@ -108,9 +108,6 @@ echo -n "Setting up build arguments: "
 
 # cf_path ensures path is converted in case we are running from windows
 config_output="$(cf_path "${destdir}")" || fail_nl "Unable to parse output path: ${destdir}"
-cmdargs=(--verbose)
-overridestr="$(append_json "" "output" "${config_output}")" || \
-  fail_nl "Unable to append output path setting while building the 'retype build' argument list"
 
 missing_retypecf=false
 if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
@@ -157,10 +154,14 @@ ${locate_cf}"
   fi
 fi
 
-if [ ! -z "${INPUT_OVERRIDE_BASE}" ]; then
-  echo -n "base, "
-  overridestr="$(append_json "${overridestr}" "base" "${INPUT_OVERRIDE_BASE}")" || \
-    fail_nl "Unable to append 'base' setting while building the 'retype build' argument list"
+if [ ! -z "${INPUT_SECRET}" ]; then
+  echo -n "set secret, "
+  cmdargs+=("--secret" "${INPUT_SECRET}")
+fi
+
+if [ ! -z "${INPUT_PASSWORD}" ]; then
+  echo -n "password, "
+  cmdargs+=("--password" "${INPUT_PASSWORD}")
 fi
 
 if [ "${INPUT_STRICT}" == "true" ]; then
@@ -168,31 +169,25 @@ if [ "${INPUT_STRICT}" == "true" ]; then
   cmdargs+=("--strict")
 fi
 
-if [ ! -z "${INPUT_LICENSE_KEY}" ]; then
-  echo -n "license key, "
-  cmdargs+=("--secret" "${INPUT_LICENSE_KEY}")
+if [ ! -z "${INPUT_OVERRIDE}" ]; then
+  echo -n "override set, "
+  cmdargs+=("--overrdie" "${INPUT_OVERRIDE}")
 fi
 
-if [ ! -z "${INPUT_PAGE_PASSWORD}" ]; then
-  echo -n "password, "
-  cmdargs+=("--password" "${INPUT_PAGE_PASSWORD}")
+if [ "${INPUT_VERBOSE}" == "true" ]; then
+  echo -n "verbose mode, "
+  cmdargs+=("--verbose")
 fi
-
-overridestr="{
-${overridestr}
-}"
-cmdargs+=("--override" "${overridestr}")
 
 echo "done"
-
 echo -n "Building documentation: "
 
 cmdln=(retype build "${cmdargs[@]}")
 result="$("${cmdln[@]}" 2>&1)" || \
-  fail_cmd true "retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"
+  fail_cmd true "Retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"
 
 if [ ! -e "${destdir}/resources/js/config.js" ]; then
-  fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output"
+  fail_nl "Retype output not found after 'retype build' run. At least resources/js/config.js is missing from output."
 fi
 
 echo "done"
