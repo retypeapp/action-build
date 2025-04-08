@@ -184,7 +184,8 @@ echo -n "Building documentation: "
 
 cmdln=(retype build "${cmdargs[@]}")
 
-echo "Retype build command: ${cmdln}"
+echo
+echo "Retype build command: ${cmdln[@]}"
 
 result="$("${cmdln[@]}" 2>&1)" || \
   fail_cmd true "Retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"
