@@ -7,7 +7,7 @@ _ifs="${IFS}"
 
 echo "Retype version: v${retype_version}"
 
-if ! which node > /dev/null 2>&1; then
+if ! command -v node &> /dev/null; then
     echo "Node.js not available"
 else
     echo "Node.js version: $(node --version)"
@@ -29,20 +29,18 @@ source "${GITHUB_ACTION_PATH}"/functions.inc.sh || {
   exit 1
 }
 
-if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
-  if [ ! -e "${INPUT_CONFIG_PATH}" ]; then
-    fail "Path to Retype config could not be found: ${INPUT_CONFIG_PATH}"
-  fi
-  echo "Path to Retype config: ${INPUT_CONFIG_PATH}"
+if [ ! -z "${INPUT_CONFIG_PATH}" ] && [ ! -e "${INPUT_CONFIG_PATH}" ]; then
+  fail "Path to Retype config could not be found: ${INPUT_CONFIG_PATH}"
 fi
+echo "Path to Retype config: ${INPUT_CONFIG_PATH}"
 
 echo "Working directory: $(pwd)"
 
 # We prefer dotnet if available as the package size is (much) smaller.
-if which dotnet > /dev/null 2>&1 && [ "$(dotnet --version | cut -f1 -d.)" -ge 9 ]; then
+if command -v dotnet &> /dev/null && [[ $(dotnet --version | cut -f1 -d.) -ge 9 ]]; then
   use_dotnet=true
-elif ! which node > /dev/null 2>&1 || [ "$(node --version | cut -f1 -d. | cut -b2-)" -lt 18 ]; then
-  fail "Cannot find a suitable dotnet or node installation to install the retype package with"
+elif ! command -v node &> /dev/null || [[ $(node --version | cut -f1 -d. | cut -b2-) -lt 18 ]]; then
+  fail "Cannot find a suitable dotnet or node installation to install the retype package with."
 fi
 
 retype_path="$(which retype 2> /dev/null)"
