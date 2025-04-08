@@ -14,7 +14,7 @@ This action will look for a [`retype.yml`](https://retype.com/configuration/proj
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 
 - uses: retypeapp/action-build@latest
 ```
@@ -27,11 +27,11 @@ The workflow file above would then become:
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
 
 - uses: actions/setup-dotnet@v1
   with:
-    dotnet-version: 7.0.x
+    dotnet-version: 9.0.x
 
 - uses: retypeapp/action-build@latest
 ```
@@ -89,7 +89,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: retypeapp/action-build@latest
 ```
@@ -144,11 +144,11 @@ The config file may have a different file name
 In a bit more complex scenario where various repositories are checked out in a workflow. This may be useful, for instance, if retype documentation is generated from files across different repositories.
 
 ```yaml
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
   with:
     path: own-repository
 
-- uses: actions/checkout@v3
+- uses: actions/checkout@v4
   with:
     repository: organization/repository-name
     path: auxiliary-repository
