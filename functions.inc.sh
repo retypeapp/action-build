@@ -1,5 +1,23 @@
 abortbuildmsg="Aborting documentation build process."
 
+function append_json() {
+  local json="${1}" key="${2}" val="${3}"
+  local sedpats=("s/(\"|\\\\)/\\\\\1/g" ":a; N; \$!ba; s/\n/\\\\n/g;s/\r//g")
+
+  # Replace newlines with \n and " with \ in key and value
+  for sedpat in "${sedpats[@]}"; do
+    key="$(echo "${key}" | sed -E "${sedpat}")" || return 1
+    val="$(echo "${val}" | sed -E "${sedpat}")" || return 1
+  done
+
+  if [ -n "${json}" ]; then
+    json="${json},
+"
+  fi
+
+  echo -n "${json}\"${key}\": \"${val}\""
+}
+
 if [ "${OSTYPE}" == "msys" ]; then
   MSYS_TMPDIR="$(mount | egrep "^[^ ]+ on /tmp type" | cut -f1 -d" ")"
 

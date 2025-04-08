@@ -97,20 +97,20 @@ fi
 destdir="$(mktemp -d)"
 echo "Base directory: ${destdir}"
 
-# Check if INPUT_OUTPUT is provided and append it to destdir correctly
-if [ -n "${INPUT_OUTPUT}" ]; then
-  # Normalize INPUT_OUTPUT to remove leading and trailing slashes
-  normalized_output="$(echo "${INPUT_OUTPUT}" | sed 's:^/*::;s:/*$::')"
+# # Check if INPUT_OUTPUT is provided and append it to destdir correctly
+# if [ -n "${INPUT_OUTPUT}" ]; then
+#   # Normalize INPUT_OUTPUT to remove leading and trailing slashes
+#   normalized_output="$(echo "${INPUT_OUTPUT}" | sed 's:^/*::;s:/*$::')"
 
-  # Append normalized path to destdir
-  destdir="${destdir}/${normalized_output}"
-  mkdir -p "${destdir}"  # Ensure the directory exists
+#   # Append normalized path to destdir
+#   destdir="${destdir}/${normalized_output}"
+#   mkdir -p "${destdir}"  # Ensure the directory exists
 
-  echo "Adding output sub-directory"
-  echo "Final destination directory: ${destdir}"
-fi
+#   echo "Adding output sub-directory"
+#   echo "Final destination directory: ${destdir}"
+# fi
 
-echo "Check directory: ${destdir}"
+# echo "Check directory: ${destdir}"
 
 echo -n "Configure build arguments: "
 
@@ -162,6 +162,11 @@ ${locate_cf}"
   fi
 fi
 
+if [ ! -z "${INPUT_OUTPUT}" ]; then
+  echo -n "set output, "
+  cmdargs+=("--output" "${INPUT_OUTPUT}")
+fi
+
 if [ ! -z "${INPUT_SECRET}" ]; then
   echo -n "set secret, "
   cmdargs+=("--secret" "${INPUT_SECRET}")
@@ -206,9 +211,9 @@ echo "Retype build command: ${cmdln}"
 result="$("${cmdln[@]}" 2>&1)" || \
   fail_cmd true "Retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"
 
-if [ ! -e "${destdir}/resources/js/config.js" ]; then
-  fail_nl "Retype output not found after building."
-fi
+# if [ ! -e "${destdir}/resources/js/config.js" ]; then
+#   fail_nl "Retype output not found after building."
+# fi
 
 echo "done"
 
