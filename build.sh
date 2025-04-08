@@ -115,7 +115,6 @@ subdir=""
 if [ -n "${INPUT_OUTPUT}" ]; then
   # Remove leading slash, if present
   subdir="${INPUT_OUTPUT##/}"
-  echo "Target subdirectory: ${subdir}"``
 fi
 
 # Construct the full destination directory path
@@ -127,27 +126,7 @@ else
   destdir="${workflowdir}"
 fi
 
-echo "Target subdirectory: ${destdir}"
-
-# # Create a temporary directory for the base destination
-# destdir="$(mktemp -d)"
-# echo "Base directory: ${destdir}"
-
-# # Check if INPUT_OUTPUT is provided and append it to destdir correctly
-# if [ -n "${INPUT_OUTPUT}" ]; then
-#   # Normalize INPUT_OUTPUT to remove leading and trailing slashes
-#   normalized_output="$(echo "${INPUT_OUTPUT}" | sed 's:^/*::;s:/*$::')"
-
-#   # Append normalized path to destdir
-#   destdir="${destdir}/${normalized_output}"
-#   mkdir -p "${destdir}"  # Ensure the directory exists
-
-#   echo "Adding output sub-directory"
-#   echo "Final destination directory: ${destdir}"
-# fi
-
-# echo "Check directory: ${destdir}"
-
+echo "Target directory: ${destdir}"
 echo -n "Configure build arguments: "
 
 # cf_path ensures path is converted in case we are running from windows
@@ -155,10 +134,9 @@ config_output="$(cf_path "${destdir}")" || fail_nl "Unable to parse output path:
 
 missing_retypecf=false
 if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
-  # In case path is a directory and there's no Retype conf file, the process
-  # is supposed to fail (we won't try 'retype init')
-  echo "INPUT_CONFIG_PATH: ${INPUT_CONFIG_PATH}"
-  echo -n "${INPUT_CONFIG_PATH}, "
+  # In case path is a directory and there's no Retype conf file,
+  # the process is supposed to fail (we won't try 'retype init')
+  echo -n "INPUT_CONFIG_PATH: ${INPUT_CONFIG_PATH}, "
   cmdargs+=("${INPUT_CONFIG_PATH}")
 else
   if [ -e "retype.yml" ]; then
@@ -204,11 +182,6 @@ ${locate_cf}"
   fi
 fi
 
-echo
-echo "CURRENT ARGS: ${cmdargs}"
-echo "INPUT_OUTPUT: ${INPUT_OUTPUT}"
-echo
-
 # Check if destdir has a value and append it to cmdargs
 if [ -n "${destdir}" ]; then
   echo -n "set output, "
@@ -241,24 +214,12 @@ if [ "${INPUT_VERBOSE}" == "true" ]; then
 fi
 
 echo "done"
-echo -n "Building documentation: "
-
-echo "cmdargs content: ${cmdargs[@]}"
-echo
 
 # Create the initial command with mandatory parts
 cmdln=("retype" "build")
 
-echo
-echo "args: ${cmdargs[@]}"
-echo
-
 # Only append cmdargs if it is not empty
 if [ ${#cmdargs[@]} -gt 0 ]; then
-  echo
-  echo "WE FOUND ARGS: ${cmdargs[@]}"
-  echo
-
   cmdln+=("${cmdargs[@]}")  # Append all elements of cmdargs to cmdln
 fi
 
@@ -275,8 +236,6 @@ if [ ! -e "${destdir}/resources/js/config.js" ]; then
   fail_nl "Retype output not found after building."
 fi
 
-echo "done"
-
 echo "::group::Command: ${cmdln[@]}
 ${result}
 ::endgroup::"
@@ -286,10 +245,10 @@ if ${missing_retypecf}; then
     fail_cmd true "Unable to remove default retype.yml placed into repo root" "rm \"retype.yml\"" "${result}"
 fi
 
-echo -n "Documentation output: ${destdir}"
 if [ "${config_output}" != "${destdir}" ]; then
   echo -n " (${config_output})"
 fi
+
 echo "" # break line after the message above is done being composed.
 
 # This makes the output path available via the
@@ -316,4 +275,4 @@ result="$(git clean -d -x -q -f 2>&1)" || \
   fail_cmd comma "Unable to clean up repository after Retype build." "git clean -d -x -q -f" "${result}"
 
 echo ", done
-Retype documentation build completed successfully"
+Retype build completed successfully"
