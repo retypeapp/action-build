@@ -162,6 +162,10 @@ ${locate_cf}"
   fi
 fi
 
+echo
+echo "INPUT_OUTPUT: ${INPUT_OUTPUT}"
+echo
+
 if [ ! -z "${INPUT_OUTPUT}" ]; then
   echo -n "set output, "
   cmdargs+=("--output" "${INPUT_OUTPUT}")
@@ -197,6 +201,10 @@ echo -n "Building documentation: "
 
 # Create the initial command with mandatory parts
 cmdln=("retype build ${destdir}")
+
+echo
+echo "args: ${cmdargs[@]}"
+echo
 
 # Only append cmdargs if it is not empty
 if [ ${#cmdargs[@]} -gt 0 ]; then
