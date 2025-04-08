@@ -1,11 +1,10 @@
 #!/bin/bash
 
 retype_version="3.7.0"
-
 use_dotnet=false
 _ifs="${IFS}"
 
-echo "Retype version: v${retype_version}"
+echo "Retype version:  v${retype_version}"
 
 if ! command -v node &> /dev/null; then
     echo "Node.js not available"
@@ -16,7 +15,7 @@ fi
 if ! command -v dotnet &> /dev/null; then
     echo "dotnet not available"
 else
-    echo "dotnet version: $(dotnet --version)"
+    echo "dotnet version:  $(dotnet --version)"
 fi
 
 if [ ! -e "${GITHUB_ACTION_PATH}/functions.inc.sh" ]; then
@@ -32,7 +31,8 @@ source "${GITHUB_ACTION_PATH}"/functions.inc.sh || {
 if [ ! -z "${INPUT_CONFIG_PATH}" ] && [ ! -e "${INPUT_CONFIG_PATH}" ]; then
   fail "Path to Retype config could not be found: ${INPUT_CONFIG_PATH}"
 fi
-echo "Path to Retype config: ${INPUT_CONFIG_PATH}"
+
+echo "Relative path to Retype config: ${INPUT_CONFIG_PATH}"
 
 echo "Working directory: $(pwd)"
 
@@ -40,7 +40,7 @@ echo "Working directory: $(pwd)"
 if command -v dotnet &> /dev/null && [[ $(dotnet --version | cut -f1 -d.) -ge 9 ]]; then
   use_dotnet=true
 elif ! command -v node &> /dev/null || [[ $(node --version | cut -f1 -d. | cut -b2-) -lt 18 ]]; then
-  fail "Cannot find a suitable dotnet or node installation to install the retype package with."
+  fail "Cannot find a suitable dotnet or Node.js installation to install the Retype package with"
 fi
 
 retype_path="$(which retype 2> /dev/null)"
@@ -50,11 +50,13 @@ if [ ${retstat} -eq 0 ]; then
   if [ "$(retype --version | strings)" == "${retype_version}" ]; then
     echo "Using existing retype installation at: ${retype_path}"
   else
-    fail "Found existing installation of retype for a different version than this action is intended to work with
+    fail "Found existing installation of Retype for a different version than this action \
+is intended to work with.
 Expected version: ${retype_version}
-Available version: $(retype --version | strings)
+Available version: $(retype --version | strings) 
 
 ${abortbuildmsg}"
+
   fi
 else
   echo -n "Installing Retype v${retype_version} using "
@@ -93,24 +95,58 @@ else
   fi
 fi
 
-# Create a temporary directory for the base destination
-destdir="$(mktemp -d)"
-echo "Base directory: ${destdir}"
+# Check if the shared environment variable already exists for this workflow
+if [ -z "${WORKFLOW_RETYPE_DIR}" ]; then
+    # by letting it create the directory we can guarantee no other call to mktemp could reference
+    # the same path.
+    export WORKFLOW_RETYPE_DIR="$(mktemp -d)"
 
-# Check if INPUT_OUTPUT is provided and append it to destdir correctly
-if [ -n "${INPUT_OUTPUT}" ]; then
-  # Normalize INPUT_OUTPUT to remove leading and trailing slashes
-  normalized_output="$(echo "${INPUT_OUTPUT}" | sed 's:^/*::;s:/*$::')"
-
-  # Append normalized path to destdir
-  destdir="${destdir}/${normalized_output}"
-  mkdir -p "${destdir}"  # Ensure the directory exists
-
-  echo "Adding output sub-directory"
-  echo "Final destination directory: ${destdir}"
+    # Save the directory to a shared GitHub environment variable so other steps can reuse it
+    echo "WORKFLOW_RETYPE_DIR=${WORKFLOW_RETYPE_DIR}" >> "${GITHUB_ENV}"
+else
+    echo -n "Reusing existing temporary workflow directory: "
+    echo "${WORKFLOW_RETYPE_DIR}"
 fi
 
-echo "Check directory: ${destdir}"
+workflowdir="${WORKFLOW_RETYPE_DIR}"
+echo "Workflow directory: ${workflowdir}"
+
+subdir=""
+if [ -n "${INPUT_OUTPUT}" ]; then
+  # Remove leading slash, if present
+  subdir="${INPUT_OUTPUT##/}"
+  echo "Target subdirectory: ${subdir}"``
+fi
+
+# Construct the full destination directory path
+if [ -n "${subdir}" ]; then
+  destdir="${workflowdir}/${subdir}"
+  # Create the full directory path with subdirectories
+  mkdir -p "${destdir}"
+else
+  destdir="${workflowdir}"
+fi
+
+echo "Target subdirectory: ${destdir}"
+
+# # Create a temporary directory for the base destination
+# destdir="$(mktemp -d)"
+# echo "Base directory: ${destdir}"
+
+# # Check if INPUT_OUTPUT is provided and append it to destdir correctly
+# if [ -n "${INPUT_OUTPUT}" ]; then
+#   # Normalize INPUT_OUTPUT to remove leading and trailing slashes
+#   normalized_output="$(echo "${INPUT_OUTPUT}" | sed 's:^/*::;s:/*$::')"
+
+#   # Append normalized path to destdir
+#   destdir="${destdir}/${normalized_output}"
+#   mkdir -p "${destdir}"  # Ensure the directory exists
+
+#   echo "Adding output sub-directory"
+#   echo "Final destination directory: ${destdir}"
+# fi
+
+# echo "Check directory: ${destdir}"
 
 echo -n "Configure build arguments: "
 
@@ -133,13 +169,17 @@ else
     echo -n "/retype.json, "
   else
     echo -n "locate, "
-    locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -not -path "*/.*" -a \( -iname retype.yml -o -iname retype.yaml -o -iname retype.json \) | cut -b 2-)"
+    locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -not -path "*/.*" -a \( \
+      -iname retype.yml -o -iname retype.yaml -o -iname retype.json \) | cut -b 2-)"
+
 
     if [ -z "${locate_cf}" ]; then
       missing_retypecf=true
       echo -n "initialize default configuration"
       result="$(retype init --verbose 2>&1)" || \
-        fail_cmd comma "'retype init' command failed with exit code ${retstat}" "retype init --verbose" "${result}"
+        fail_cmd comma \
+          "'retype init' command failed with exit code ${retstat}" \
+          "retype init --verbose" "${result}"
       echo ", show command output.
 ::warning::No Retype configuration file found, using default setting values.
 ::group::Command: retype init --verbose
@@ -151,9 +191,10 @@ ${result}
       cf_count="$(echo "${locate_cf}" | wc -l)"
 
       if [ ${cf_count} -ne 1 ]; then
-       fail_nl "More than one possible Retype configuration files found. Please remove extra files or specify the desired path with the 'config' argument (https://github.com/retypeapp/action-build#specify-path-to-the-retypeyml-file). See output for the list of paths found.
-
-Configuration files located:
+        fail_nl "More than one possible Retype configuration files found. Please remove extra \
+files or specify the desired path with the 'config' argument \
+(https://github.com/retypeapp/action-build#specify-path-to-the-retypeyml-file). See \
+output for the list of paths found. Configuration files located: 
 ${locate_cf}"
       else
         echo -n "${locate_cf}, "
@@ -253,12 +294,12 @@ echo "" # break line after the message above is done being composed.
 
 # This makes the output path available via the
 # 'steps.stepId.outputs.retype-output-path' reference, unique for the step.
-echo "retype-output-path=${destdir}" >> "${GITHUB_OUTPUT}"
+echo "retype-output-path=${workflowdir}" >> "${GITHUB_OUTPUT}"
 
 # This makes the output path available via the $RETYPE_OUTPUT_PATH that doesn't
 # require referencing but is reset by the last ran build step if more than one
 # are assigned to a job.
-echo "RETYPE_OUTPUT_PATH=${destdir}" >> "${GITHUB_ENV}"
+echo "RETYPE_OUTPUT_PATH=${workflowdir}" >> "${GITHUB_ENV}"
 
 # perform a quick clean-up to remove temporary, untracked files
 echo -n "Cleaning up repository: git-reset"
