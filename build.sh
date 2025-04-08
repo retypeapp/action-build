@@ -32,8 +32,6 @@ if [ ! -z "${INPUT_CONFIG_PATH}" ] && [ ! -e "${INPUT_CONFIG_PATH}" ]; then
   fail "Path to Retype config could not be found: ${INPUT_CONFIG_PATH}"
 fi
 
-echo "Relative path to Retype config: ${INPUT_CONFIG_PATH}"
-
 echo "Working directory: $(pwd)"
 
 # We prefer dotnet if available as the package size is (much) smaller.
@@ -127,7 +125,6 @@ else
 fi
 
 echo "Target directory: ${destdir}"
-echo -n "Configure build arguments: "
 
 # cf_path ensures path is converted in case we are running from windows
 config_output="$(cf_path "${destdir}")" || fail_nl "Unable to parse output path: ${destdir}"
@@ -136,35 +133,29 @@ missing_retypecf=false
 if [ ! -z "${INPUT_CONFIG_PATH}" ]; then
   # In case path is a directory and there's no Retype conf file,
   # the process is supposed to fail (we won't try 'retype init')
-  echo -n "INPUT_CONFIG_PATH: ${INPUT_CONFIG_PATH}, "
   cmdargs+=("${INPUT_CONFIG_PATH}")
 else
   if [ -e "retype.yml" ]; then
-    echo -n "/retype.yml, "
+    echo "/retype.yml"
   elif [ -e "retype.yaml" ]; then
-    echo -n "/retype.yaml, "
+    echo "/retype.yaml"
   elif [ -e "retype.json" ]; then
-    echo -n "/retype.json, "
+    echo "/retype.json"
   else
-    echo -n "locate, "
     locate_cf="$(find ./ -mindepth 2 -maxdepth 3 -not -path "*/.*" -a \( \
       -iname retype.yml -o -iname retype.yaml -o -iname retype.json \) | cut -b 2-)"
 
-
     if [ -z "${locate_cf}" ]; then
       missing_retypecf=true
-      echo -n "initialize default configuration"
+      echo "Initialize default configuration:"
       result="$(retype init --verbose 2>&1)" || \
         fail_cmd comma \
           "'retype init' command failed with exit code ${retstat}" \
           "retype init --verbose" "${result}"
-      echo ", show command output.
-::warning::No Retype configuration file found, using default setting values.
+      echo "::warning::No Retype project configuration file found, using default values.
 ::group::Command: retype init --verbose
 ${result}
 ::endgroup::"
-      echo -n "Setting up build arguments: resume, "
-
     else
       cf_count="$(echo "${locate_cf}" | wc -l)"
 
@@ -175,7 +166,7 @@ files or specify the desired path with the 'config' argument \
 output for the list of paths found. Configuration files located: 
 ${locate_cf}"
       else
-        echo -n "${locate_cf}, "
+        echo "${locate_cf}, "
         cmdargs+=("${locate_cf:1}")
       fi
     fi
@@ -184,36 +175,28 @@ fi
 
 # Check if destdir has a value and append it to cmdargs
 if [ -n "${destdir}" ]; then
-  echo -n "set output, "
   cmdargs+=("--output" "${destdir}")
 fi
 
 if [ ! -z "${INPUT_SECRET}" ]; then
-  echo -n "set secret, "
   cmdargs+=("--secret" "${INPUT_SECRET}")
 fi
 
 if [ ! -z "${INPUT_PASSWORD}" ]; then
-  echo -n "password, "
   cmdargs+=("--password" "${INPUT_PASSWORD}")
 fi
 
 if [ "${INPUT_STRICT}" == "true" ]; then
-  echo -n "strict mode, "
   cmdargs+=("--strict")
 fi
 
 if [ ! -z "${INPUT_OVERRIDE}" ]; then
-  echo -n "override set, "
   cmdargs+=("--overrdie" "${INPUT_OVERRIDE}")
 fi
 
 if [ "${INPUT_VERBOSE}" == "true" ]; then
-  echo -n "verbose mode, "
   cmdargs+=("--verbose")
 fi
-
-echo "done"
 
 # Create the initial command with mandatory parts
 cmdln=("retype" "build")
