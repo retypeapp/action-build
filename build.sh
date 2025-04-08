@@ -97,10 +97,10 @@ fi
 destdir="$(mktemp -d)"
 echo "Base directory: ${destdir}"
 
-# Check if INPUT_SUBDIR is provided and append it to destdir correctly
-if [ -n "${INPUT_SUBDIR}" ]; then
-  # Normalize INPUT_SUBDIR to remove leading and trailing slashes
-  normalized_output="$(echo "${INPUT_SUBDIR}" | sed 's:^/*::;s:/*$::')"
+# Check if INPUT_OUTPUT is provided and append it to destdir correctly
+if [ -n "${INPUT_OUTPUT}" ]; then
+  # Normalize INPUT_OUTPUT to remove leading and trailing slashes
+  normalized_output="$(echo "${INPUT_OUTPUT}" | sed 's:^/*::;s:/*$::')"
 
   # Append normalized path to destdir
   destdir="${destdir}/${normalized_output}"
@@ -190,10 +190,18 @@ fi
 echo "done"
 echo -n "Building documentation: "
 
-cmdln=(retype build "${cmdargs[@]}")
+# Create the initial command with mandatory parts
+cmdln=("retype" "build" "${destdir}")
 
-echo
-echo "Retype build command: ${cmdln[@]}"
+# Only append cmdargs if it is not empty
+if [ ${#cmdargs[@]} -gt 0 ]; then
+    cmdln+=("${cmdargs[@]}")  # Append all elements of cmdargs to cmdln
+fi
+
+echo "Retype build command: ${cmdln}"
+
+# Execute the command
+"${cmdln[@]}"
 
 result="$("${cmdln[@]}" 2>&1)" || \
   fail_cmd true "Retype build command failed with exit code ${retstat}" "${cmdln[*]}" "${result}"

@@ -4,6 +4,11 @@ description: |-
   Builds documentation using Retype. The output from this step can be
   published to the hosting of choice.
 inputs:
+  output:
+    description: |-
+      Custom path to the output directory. Default is "" (empty).
+    required: false
+    default: ''
   secret:
     description: |-
       License key to use with Retype. The Retype license key is private.
@@ -38,11 +43,6 @@ inputs:
       file. When a directory, Retype will look for the 'retype.[yml|yaml|json]' 
       file in this directory.
     default: ''
-  subdir:
-    description: |-
-      Custom sub-directory to output the built website to. Default is "" (empty).
-    required: false
-    default: ''
 outputs:
   retype-output-path:
     description: |-
@@ -56,7 +56,7 @@ runs:
       run: "${GITHUB_ACTION_PATH}/build.sh"
       shell: bash
       env:
-        INPUT_SUBDIR: ${{ inputs.subdir }}
+        INPUT_OUTPUT: ${{ inputs.output }}
         INPUT_SECRET: ${{ inputs.secret || inputs.license }}
         INPUT_PASSWORD: ${{ inputs.password }}
         INPUT_STRICT: ${{ inputs.strict }}
