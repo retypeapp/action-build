@@ -37,7 +37,7 @@ inputs:
       Enable verbose logging during build process. Default is false.
     required: false
     default: 'false'
-  config:
+  config_path:
     description: |-
       Path to the retype.yml file. May point to a directory, a JSON or YAML
       file. When a directory, Retype will look for the 'retype.[yml|yaml|json]' 
@@ -62,4 +62,4 @@ runs:
         INPUT_STRICT: ${{ inputs.strict }}
         INPUT_OVERRIDE: ${{ inputs.override }}
         INPUT_VERBOSE: ${{ inputs.verbose }}
-        INPUT_CONFIG_PATH: ${{ inputs.config }}
+        INPUT_CONFIG_PATH: ${{ inputs.config_path }}
