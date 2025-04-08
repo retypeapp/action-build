@@ -191,7 +191,7 @@ echo "done"
 echo -n "Building documentation: "
 
 # Create the initial command with mandatory parts
-cmdln=("retype" "build" "${destdir}")
+cmdln=("retype build ${destdir}")
 
 # Only append cmdargs if it is not empty
 if [ ${#cmdargs[@]} -gt 0 ]; then
