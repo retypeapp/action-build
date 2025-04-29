@@ -178,8 +178,11 @@ if [ -n "${destdir}" ]; then
   cmdargs+=("--output" "${destdir}")
 fi
 
-if [ ! -z "${INPUT_SECRET}" ]; then
-  cmdargs+=("--secret" "${INPUT_SECRET}")
+if [ ! -z "${INPUT_KEY}" ]; then
+  cmdargs+=("--key" "${INPUT_KEY}")
+elif [ ! -z "${INPUT_SECRET}" ]; then
+  # For backward compatibility
+  cmdargs+=("--key" "${INPUT_SECRET}")
 fi
 
 if [ ! -z "${INPUT_PASSWORD}" ]; then
