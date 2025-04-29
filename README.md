@@ -40,7 +40,7 @@ There is a small performance gain if a `dotnet` environment is configured as the
 
 ## Inputs
 
-Configuration of the project should be done in the projects [`.github/workflows/retype-action.yml`](https://retype.com/guides/github-actions/#retype_secret) file.
+Configuration of the project should be done in the projects [`.github/workflows/retype-action.yml`](https://retype.com/guides/github-actions/#retype_key) file.
 
 ### `output`
 
@@ -52,27 +52,27 @@ Custom folder to store the output from the Retype build process. Default is `""`
     output: my_output_directory/
 ```
 
-### `secret`
+### `key`
 
-License key to use with Retype. The Retype license key is private. 
+Key to use with Retype. The Retype key is private. 
 
-Please store your license key as a GitHub [Secret](https://retype.com/guides/github-actions/#retype_secret).
+Please store your key as a GitHub [Secret](https://retype.com/guides/github-actions/#retype_key).
 
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    secret: ${{ secrets.RETYPE_SECRET }}
+    key: ${{ secrets.RETYPE_KEY }}
 ```
 
-The `secret` can also be set using `env` Environment variables.
+The `key` can also be set using `env` Environment variables.
 
 ```yaml
 - uses: retypeapp/action-build@latest
   env:
-    RETYPE_SECRET: ${{ secrets.RETYPE_SECRET }}
+    RETYPE_KEY: ${{ secrets.RETYPE_KEY }}
 ```
 
-**IMPORTANT**: The `secret` value cannot be saved directly to your workflow configuration file. To pass a license key to Retype during the build process, the value must be passed as a GitHub Secret. For information on how to store a secret on your repository or organization, see [RETYPE_SECRET](https://retype.com/guides/github-actions/#retype_secret) docs.
+**IMPORTANT**: The `key` value cannot be saved directly to your workflow configuration file. To pass a key to Retype during the build process, the value must be passed as a GitHub Secret. For information on how to store a secret in your repository or organization, see [RETYPE_KEY](https://retype.com/guides/github-actions/#retype_key) docs.
 
 ### `password`
 
@@ -179,14 +179,14 @@ steps:
   - uses: retypeapp/action-build@latest
 ```
 
-### Specify a Retype license key
+### Specify a Retype key
 
-If a license key is required, please configure using a GitHub Secret. See `RETYPE_SECRET` [documentation](https://retype.com/guides/github-actions/#retype_secret).
+If a key is required, please configure using a GitHub Secret. See `RETYPE_KEY` [documentation](https://retype.com/guides/github-actions/#retype_key).
 
 ```yaml
 - uses: retypeapp/action-build@latest
   with:
-    secret: ${{ secrets.RETYPE_SECRET }}
+    key: ${{ secrets.RETYPE_KEY }}
 ```
 
 For more information on how to set up and use secrets in GitHub actions, see [Encrypted secrets](https://docs.github.com/en/actions/reference/encrypted-secrets).
