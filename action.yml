@@ -6,13 +6,13 @@ description: |-
 inputs:
   output:
     description: |-
-      Path to `retype.yml` file or path to a specific configuration file. Default is `""` (empty).
+      Custom folder to store the output from the Retype build process. Default is `""` (empty).
     required: false
     default: ''
-  secret:
+  key:
     description: |-
-      License key to use with Retype. The Retype license key is private.
-      Please store your license key as a GitHub secret.
+      Retype Key to unlock Pro features. Your Retype Key is private. 
+      Please store your key as a GitHub secret.
     required: false
     default: ''
   password:
@@ -57,7 +57,7 @@ runs:
       shell: bash
       env:
         INPUT_OUTPUT: ${{ inputs.output }}
-        INPUT_SECRET: ${{ inputs.secret || inputs.license }}
+        INPUT_KEY: ${{ inputs.key }} || ${{ inputs.secret || inputs.license }}
         INPUT_PASSWORD: ${{ inputs.password }}
         INPUT_STRICT: ${{ inputs.strict }}
         INPUT_OVERRIDE: ${{ inputs.override }}
