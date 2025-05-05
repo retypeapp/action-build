@@ -57,7 +57,7 @@ runs:
       shell: bash
       env:
         INPUT_OUTPUT: ${{ inputs.output }}
-        INPUT_KEY: ${{ inputs.key }} || ${{ inputs.secret || inputs.license }}
+        INPUT_KEY: ${{ inputs.key || inputs.secret || inputs.license }}
         INPUT_PASSWORD: ${{ inputs.password }}
         INPUT_STRICT: ${{ inputs.strict }}
         INPUT_OVERRIDE: ${{ inputs.override }}
