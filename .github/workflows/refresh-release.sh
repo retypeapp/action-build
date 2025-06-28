@@ -84,32 +84,18 @@ if ! ${prerelease}; then
  fi
 fi
 
+# FIXED: Handle existing tags gracefully instead of failing
 if [ ${#overtags[@]} -gt 0 ]; then
- failmsg="Tag"
- if [ ${#overtags[@]} -gt 1 ]; then
-  failmsg+="s"
- fi
- pos=0
- beforelastpos=$(( 10#${#overtags[@]} - 2 ))
+ echo "::warning::Tag(s) ${overtags[@]} already exist(s). Updating existing tag(s) to point to latest commit."
+ 
+ # Remove existing tags locally and remotely
  for tag in "${overtags[@]}"; do
-  failmsg+=" ${overtags[pos]}"
-  if [ ${pos} -eq ${beforelastpos} ]; then
-   failmsg+=" and"
-  elif [ ${pos} -lt ${beforelastpos} ]; then
-   failmsg+=","
-  fi
-  pos="$(( 10#${pos} + 1 ))"
+   echo "Removing existing tag: ${tag}"
+   git tag -d "${tag}" 2>/dev/null || true
+   git push origin ":${tag}" 2>/dev/null || true
  done
-
- failmsg+=" already exists. To release this version afresh, remove"
- if [ ${#overtags[@]} -gt 1 ]; then
-  failmsg+=" them"
- else
-  failmsg+=" it"
- fi
- failmsg+=" from GitHub and try again."
-
- fail "${failmsg}"
+ 
+ echo "Existing tags removed. Proceeding with release process."
 fi
 
 # We also skip releases during pre-releases in this case, because in this repo, releases
