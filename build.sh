@@ -1,6 +1,6 @@
 #!/bin/bash
 
-retype_version="3.11.3-preview"
+retype_version="3.11.0-preview4"
 use_dotnet=false
 _ifs="${IFS}"
 
