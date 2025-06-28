@@ -32,7 +32,13 @@ stdin.on('data', function (chunk) {
 stdin.on('end', function() {
  var objdata = JSON.parse(data);
  var pkmeta=objdata.items[0];
- console.log(pkmeta.items[pkmeta.items.length-1].catalogEntry.version);
+ // Filter for only listed packages and get the latest one
+ var listedItems = pkmeta.items.filter(item => item.catalogEntry.listed !== false);
+ if (listedItems.length === 0) {
+  console.error('No listed packages found');
+  process.exit(1);
+ }
+ console.log(listedItems[listedItems.length-1].catalogEntry.version);
 });
 stdin.on('error', console.error);"
 
