@@ -1,6 +1,12 @@
 name: Publish new Release
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Retype version to release (e.g., 4.1.0-preview). If not provided, queries NuGet.org for the latest version.'
+        required: false
+        type: string
+        default: ''
 jobs:
   publish:
     name: Sync Retype and Release
@@ -9,4 +15,9 @@ jobs:
       - uses: actions/checkout@v6
       - name: Update and Release
         shell: bash
-        run: .github/workflows/refresh-release.sh --github-token="${{ secrets.GITHUB_TOKEN }}"
+        run: |
+          args="--github-token=${{ secrets.GITHUB_TOKEN }}"
+          if [ -n "${{ inputs.version }}" ]; then
+            args+=" --version=${{ inputs.version }}"
+          fi
+          .github/workflows/refresh-release.sh ${args}
